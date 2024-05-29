@@ -60,7 +60,7 @@ def parse_args():
                         type=str)
     parser.add_argument('--lr_rate', default=0.0002,
                         type=float)
-    parser.add_argument('--con_training', default=0,
+    parser.add_argument('--con_training', default=1,
                         type=int)
     parser.add_argument('--train_frac', default=0.8,
                         type=float)
@@ -128,13 +128,12 @@ def train_vae()->None:
     else:
         raise ValueError(f"Undefined data model {args.model}. You can only choose: mnist, svhn, celeba")
                             
-        
+    save_path = ''.join((args.save_path, args.model, '/'))
     if args.con_training:
-        state = load_model(args.save_path)
+        state = load_model(save_path)
     else:
         state = None
     
-    save_path = ''.join((args.save_path, args.model, '/'))
     if not (os.path.exists(save_path)):
         os.mkdir(save_path)
     
