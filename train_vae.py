@@ -60,7 +60,7 @@ def parse_args():
                         type=str)
     parser.add_argument('--lr_rate', default=0.0002,
                         type=float)
-    parser.add_argument('--con_training', default=1,
+    parser.add_argument('--con_training', default=0,
                         type=int)
     parser.add_argument('--train_frac', default=0.8,
                         type=float)

@@ -24,9 +24,7 @@ def celeba_generator(data_dir:str='../../../../../Data/CelebA/',
     if not(os.path.exists(data_dir)):
         os.mkdir(data_dir)
         
-    if not(os.path.exists('../celeba')):
-        os.mkdir('../celeba')
-    
+    zip_dir = ''.join((data_dir, 'img'))
     data_dir = ''.join((data_dir, 'celeba.zip'))
     
     if not (os.path.isfile(data_dir)):
@@ -34,16 +32,18 @@ def celeba_generator(data_dir:str='../../../../../Data/CelebA/',
         url = "https://drive.google.com/uc?id=1O7m1010EJjLE5QxLZiM9Fpjs7Oj6e684"
         gdown.download(url, data_dir, quiet=True)
     
+    if not(os.path.exists(zip_dir)):
+        os.mkdir(zip_dir)
         with ZipFile(data_dir, "r") as zipobj:
-            zipobj.extractall("../celeba")
+            zipobj.extractall(zip_dir)
         
     ds_train = keras.utils.image_dataset_from_directory(
-        "../celeba", label_mode=None, image_size=(64, 64), batch_size=1,
+        zip_dir, label_mode=None, image_size=(64, 64), batch_size=1,
         validation_split=1-train_frac, subset="training", seed=seed)
     ds_train = ds_train.map(lambda x: x / 255.0)
     
     ds_test = keras.utils.image_dataset_from_directory(
-        "../celeba", label_mode=None, image_size=(64, 64), batch_size=1,
+        zip_dir, label_mode=None, image_size=(64, 64), batch_size=1,
         validation_split=1-train_frac, subset="validation", seed=seed)
     ds_test = ds_test.map(lambda x: x / 255.0)
     
