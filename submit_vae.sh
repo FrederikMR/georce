@@ -22,10 +22,10 @@ python3 train_vae.py \
     --svhn_dir ../../Data/SVHN/ \
     --celeba_dir ../../Data/CelebA/ \
     --lr_rate 0.0002 \
-    --con_training 0 \
+    --con_training 1 \
     --split 0.8 \
     --batch_size 100 \
-    --epochs 1000000 \
+    --epochs 100000000 \
     --seed 2712 \
     --save_step 100 \
     --save_path models/
