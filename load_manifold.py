@@ -12,18 +12,18 @@ Created on Thu Apr 18 09:47:42 2024
 
 import jax.numpy as jnp
 
-import jaxman
+from manifolds import nSphere, nEuclidean, nParaboloid, HyperbolicParaboloid
 
 #%% Load manifolds
 
 def load_manifold(manifold:str="Euclidean", dim = 2):
     
     if manifold == "Euclidean":
-        M = jaxman.Euclidean(dim=dim)
-        x0 = -0.0*jnp.ones(dim)
-        xT = jnp.ones(dim)
+        M = nEuclidean(dim=dim)
+        z0 = -jnp.ones(dim, dtype=jnp.float32)
+        zT = jnp.ones(dim, dtype=jnp.float32)
     elif manifold == "Paraboloid":
-        M = jaxman.Paraboloid(dim=dim)
+        M = nParaboloid(dim=dim)
         x0 = -0.0*jnp.ones(dim)
         xT = jnp.ones(dim)
     elif manifold == "nSphere":

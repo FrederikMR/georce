@@ -29,7 +29,6 @@ def train_VAE_model(model:object,
                     generator:object,
                     lr_rate:float = 0.002,
                     save_path:str = '',
-                    batch_size:int=100,
                     state:TrainingState = None,
                     epochs:int=1000,
                     save_step:int = 100,
@@ -85,12 +84,8 @@ def train_VAE_model(model:object,
                                mu_dtype=None)
         
     initial_rng_key = jrandom.PRNGKey(seed)
-    
-    data_sample = next(iter(generator.batch(batch_size)))
-    if type(data_sample) == tuple:
-        data_sample = jnp.array(data_sample[0]).squeeze()
-    else:
-        data_sample = jnp.array(data_sample).squeeze()
+
+    data_sample = next(generator).x
     if type(model) == hk.Transformed:
         if state is None:
             initial_params = model.init(jrandom.PRNGKey(seed), data_sample)
@@ -105,14 +100,7 @@ def train_VAE_model(model:object,
         vae_apply_fn = lambda params, data, rng_key, state_val: model.apply(params, state_val, rng_key, data)[0]
 
     for step in range(epochs):
-        dataset_epoch = iter(generator.batch(batch_size))
-        for ds in dataset_epoch:
-            
-            if type(ds) == tuple:
-                ds = jnp.array(ds[0]).squeeze()
-            else:
-                ds = jnp.array(ds).squeeze()
-            state, loss = update(state, ds)
+        state, loss = update(state, next(generator).x)
         if (step+1) % save_step == 0:
             save_model(save_path, state)
             print(f"Epoch: {step+1} \t ELBO: {loss[0]:.4f} \t RecLoss: {loss[1][0]:.4f} \t KLD: {loss[1][1]:.4f}")

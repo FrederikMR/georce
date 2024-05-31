@@ -23,7 +23,7 @@ python3 train_vae.py \
     --celeba_dir ../../Data/CelebA/ \
     --lr_rate 0.0002 \
     --con_training 0 \
-    --train_frac 0.8 \
+    --split 0.8 \
     --batch_size 100 \
     --epochs 50000 \
     --seed 2712 \

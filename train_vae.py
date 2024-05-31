@@ -62,7 +62,7 @@ def parse_args():
                         type=float)
     parser.add_argument('--con_training', default=0,
                         type=int)
-    parser.add_argument('--train_frac', default=0.8,
+    parser.add_argument('--split', default=0.8,
                         type=float)
     parser.add_argument('--batch_size', default=100,
                         type=int)
@@ -85,7 +85,10 @@ def train_vae()->None:
     args = parse_args()
     
     if args.model == "mnist":
-        ds_train = mnist_generator(seed=args.seed, train_frac=args.train_frac)[0]
+        split = int(args.split*100)
+        ds_train = mnist_generator(seed=args.seed, 
+                                   batch_size=args.batch_size,
+                                   split=f'train[:{split}%]')
         
         @hk.transform_with_state
         def vae_model(x):
@@ -98,8 +101,11 @@ def train_vae()->None:
           
             return vae(x)
     elif args.model == "svhn":
+        split = int(args.split*100)
         ds_train = svhn_generator(data_dir=args.svhn_dir,
-                                  seed=args.seed, train_frac=args.train_frac)[0]
+                                  batch_size=args.batch_size,
+                                  seed=args.seed, 
+                                  split=f'train[:{split}%]')
         
         @hk.transform_with_state
         def vae_model(x):
@@ -113,7 +119,9 @@ def train_vae()->None:
             return vae(x)
     elif args.model == "celeba":
         ds_train = celeba_generator(data_dir=args.celeba_dir,
-                                  seed=args.seed, train_frac=args.train_frac)[0]
+                                    batch_size=args.batch_size,
+                                    seed=args.seed, 
+                                    split=args.split)
         
         @hk.transform_with_state
         def vae_model(x):
@@ -136,12 +144,11 @@ def train_vae()->None:
     
     if not (os.path.exists(save_path)):
         os.mkdir(save_path)
-    
+
     train_VAE_model(model=vae_model,
                         generator=ds_train,
                         lr_rate = args.lr_rate,
                         save_path = save_path,
-                        batch_size=args.batch_size,
                         state = state,
                         epochs=args.epochs,
                         save_step = args.save_step,

@@ -28,6 +28,7 @@ import scipy.io as sio
 import random
 
 import tensorflow as tf
+import tensorflow_datasets as tfds
 
 import keras
 
@@ -48,4 +49,4 @@ import gdown
 from zipfile import ZipFile
 
 from abc import ABC
-from typing import Callable, Tuple, NamedTuple
+from typing import Callable, Tuple, NamedTuple, Iterator
