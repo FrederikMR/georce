@@ -83,6 +83,9 @@ class nSphere(RiemannianManifold):
              y:Array
              )->Array:
         
+        x = self.F(x)
+        y = self.F(y)
+        
         return jnp.arccos(jnp.dot(x,y))
     
     def Exp(self,
@@ -114,6 +117,9 @@ class nSphere(RiemannianManifold):
         
         if t_grid is None:
             t_grid = jnp.linspace(0.,1.,100)
+            
+        x = self.F(x)
+        y = self.F(y)
         
         v = self.Log(x,y)
         
