@@ -12,7 +12,7 @@ from jax import Array
 from jax import tree_leaves, tree_map, tree_flatten, tree_unflatten
 from jax import vmap, grad, jacfwd, value_and_grad, jit
 from jax import lax
-from jax.nn import tanh, sigmoid
+from jax.nn import gelu, sigmoid
 
 import jax.numpy as jnp
 import jax.random as jrandom

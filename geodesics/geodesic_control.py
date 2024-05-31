@@ -41,7 +41,7 @@ class GC_LineSearch(ABC):
         if init_fun is None:
             self.init_fun = lambda z0, zT, T: (zT-z0)*jnp.linspace(0.0,
                                                                    1.0,
-                                                                   T,
+                                                                   self.T,
                                                                    endpoint=False,
                                                                    dtype=z0.dtype)[1:].reshape(-1,1)+z0
         
@@ -49,9 +49,10 @@ class GC_LineSearch(ABC):
         
         return "Geodesic Computation Object using Control Problem"
     
-    def energy_fixed_endpoint(self, 
-                        zt:Array, 
-                        )->Array:
+    def energy(self, 
+               zt:Array,
+               *args,
+               )->Array:
         
         term1 = zt[0]-self.z0
         val1 = jnp.einsum('i,ij,j->', term1, self.G0, term1)
@@ -65,26 +66,11 @@ class GC_LineSearch(ABC):
         
         return val1+jnp.sum(val2)+val3
     
-    def energy_variable_endpoint(self, 
-                                 zt:Array, 
-                                 *args,
-                                 )->Array:
-        
-        term1 = zt[0]-self.z0
-        val1 = jnp.einsum('i,ij,j->', term1, self.G0, term1)
-        
-        term2 = zt[1:]-zt[:-1]
-        Gt = vmap(lambda z: self.M.G(z))(zt)
-        
-        val2 = jnp.einsum('ti,tij,tj->t', term2, Gt[:-1], term2)
-        
-        return val1+jnp.sum(val2)
-    
     def Denergy(self,
                 zt:Array,
                 )->Array:
         
-        return grad(lambda z: self.energy_fixed_endpoint(z))(zt)
+        return grad(lambda z: self.energy(z))(zt)
     
     def inner_product(self,
                       zt:Array,
@@ -109,7 +95,7 @@ class GC_LineSearch(ABC):
                   ut:Array,
                   )->Array:
         
-        return self.z0+jnp.cumsum(alpha*ut_hat+(1-alpha)*ut, axis=0)
+        return self.z0+jnp.cumsum(alpha*ut_hat[:-1]+(1-alpha)*ut[:-1], axis=0)
     
     def cond_fun(self, 
                  carry:Tuple[Array,Array,Array, Array, int],
@@ -133,7 +119,7 @@ class GC_LineSearch(ABC):
         tau = self.line_search(zt, ut_hat, ut)
 
         ut = tau*ut_hat+(1.-tau)*ut
-        zt = self.z0+jnp.cumsum(ut, axis=0)[:-1]
+        zt = self.z0+jnp.cumsum(ut[:-1], axis=0)
 
         gt = self.gt(zt,ut[1:])#jnp.einsum('tj,tjid,ti->td', un[1:], self.M.DG(xn[1:-1]), un[1:])
         gt_inv = jnp.vstack((self.Ginv0, vmap(lambda z: self.M.Ginv(z))(zt)))
@@ -163,7 +149,7 @@ class GC_LineSearch(ABC):
         
         zt = self.init_fun(z0,zT,self.T)
         
-        self.line_search = SoftLineSearch(obj_fun=self.energy_variable_endpoint,
+        self.line_search = SoftLineSearch(obj_fun=self.energy,
                                           update_fun=self.update_xt,
                                           alpha=self.lr_rate,
                                           decay_rate=self.decay_rate,
@@ -178,7 +164,7 @@ class GC_LineSearch(ABC):
         
         
         ut = jnp.ones((self.T, self.dim), dtype=dtype)*self.diff/self.T
-
+        
         gt = self.gt(zt,ut[1:])#jnp.einsum('tj,tjid,ti->td', un[1:], self.M.DG(xn[1:-1]), un[1:])
         gt_inv = jnp.vstack((self.Ginv0, vmap(lambda z: self.M.Ginv(z))(zt)))
         grad = self.Denergy(zt)

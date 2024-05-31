@@ -41,7 +41,7 @@ def train_VAE_model(model:object,
     @jit
     def loss_fun(params:hk.Params, state, x:Array)->Array:
         
-        z, mu_xz, mu_zx, log_var_zx = vae_apply_fn(params, x, state.rng_key, state.state_val)
+        z, mu_xz, mu_zx, std_zx = vae_apply_fn(params, x, state.rng_key, state.state_val)
         
         batch = z.shape[0]
 
@@ -49,10 +49,13 @@ def train_VAE_model(model:object,
         z = z.reshape(batch, -1)
         mu_xz = mu_xz.reshape(batch, -1)
         mu_zx = mu_zx.reshape(batch, -1)
-        log_var_zx = log_var_zx.reshape(batch, -1)
+        std_zx = std_zx.reshape(batch, -1)
 
         rec_loss = criterion(mu_xz, x)
-        kld = -0.5*jnp.mean(jnp.sum(1.+log_var_zx-(mu_zx**2)-jnp.exp(log_var_zx), axis=-1))
+        
+        var_zx = std_zx**2
+        log_var_zx = jnp.log(var_zx)
+        kld = -0.5*jnp.mean(jnp.sum(1.+log_var_zx-(mu_zx**2)-std_zx**2, axis=-1))
         elbo = kld+rec_loss
         
         return elbo, (rec_loss, kld)

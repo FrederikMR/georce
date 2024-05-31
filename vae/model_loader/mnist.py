@@ -22,12 +22,15 @@ def preprocess_images(images):
 
 #%% Load MNIST Data
 
-def mnist_generator(seed:int=2712
+def mnist_generator(seed:int=2712,
+                    train_frac:float=0.8,
                     ):
     
     (train_images, _), (test_images, _) = tf.keras.datasets.mnist.load_data()
     
-    train_images = preprocess_images(train_images)
+    idx = random.choices(range(len(train_images)), k=int(len(train_images)*train_frac))
+    
+    train_images = preprocess_images(train_images[idx])
     test_images = preprocess_images(test_images)
     
     ds_train = tf.data.Dataset.from_tensor_slices(train_images)\

@@ -85,14 +85,14 @@ def train_vae()->None:
     args = parse_args()
     
     if args.model == "mnist":
-        ds_train = mnist_generator(seed=args.seed)[0]
+        ds_train = mnist_generator(seed=args.seed, train_frac=args.train_frac)[0]
         
         @hk.transform_with_state
         def vae_model(x):
             
             
             vae = mnist_vae(
-                        encoder=mnist_encoder(latent_dim=16),
+                        encoder=mnist_encoder(latent_dim=8),
                         decoder=mnist_decoder(),
             )
           
