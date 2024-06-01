@@ -1,6 +1,6 @@
 #!/bin/sh
 #BSUB -q gpuv100
-#BSUB -J sphere
+#BSUB -J Paraboloid
 #BSUB -n 4
 #BSUB -gpu "num=1:mode=exclusive_process"
 #BSUB -W 24:00
@@ -18,12 +18,8 @@ module swap cudnn/v8.9.1.23-prod-cuda-12.X
 module swap python3/3.10.12
 
 python3 runtime_geodesics.py \
-    --manifold Sphere \
-    --dim [2,3,5,10,20,100] \
+    --manifold Paraboloid \
     --T 100 \
-    --scipy_methods [BFGS] \
-    --con_training 1 \
-    --jax_methods [adam, sgd] \
     --jax_lr_rate 0.01 \
     --gc_lr_rate 1.0 \
     --gradient_lr_rate 1.0 \
