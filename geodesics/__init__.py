@@ -12,3 +12,5 @@ from .gradient_descent import GradientDescent
 from .jax_optimization import JAXOptimization
 from .geodesic_control import GC_LineSearch
 from .scipy_optimization import ScipyOptimization
+
+from .for_loop import *

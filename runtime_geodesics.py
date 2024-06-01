@@ -48,7 +48,7 @@ def parse_args():
     parser.add_argument('--jax_methods', default=["adam", "sgd"],
                         type=List)
     parser.add_argument('--jax_lr_rate', default=0.01,
-                        type=List)
+                        type=float)
     parser.add_argument('--gc_lr_rate', default=1.0,
                         type=float)
     parser.add_argument('--gradient_lr_rate', default=1.0,
