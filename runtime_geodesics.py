@@ -180,7 +180,7 @@ def runtime_geodesics()->None:
             if m == "adam":
                 optimizer = optimizers.adam
             elif m=="sgd":
-                optimizer == optimizer.sgd
+                optimizer == optimizers.sgd
             else:
                 raise ValueError("Invalid jax optimizer")
             Geodesic = JAXOptimization(M = M,
