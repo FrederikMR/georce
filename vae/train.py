@@ -54,10 +54,10 @@ def train_VAE_model(model:object,
         
         var_zx = std_zx**2
         log_var_zx = jnp.log(var_zx)
-        kld = -0.5*jnp.mean(jnp.sum(1.+log_var_zx-(mu_zx**2)-std_zx**2, axis=-1))
-        elbo = kld+rec_loss
+        kld = 0.5 * jnp.sum(-log_var_zx - 1. + var_zx + jnp.square(mu_zx), axis=-1)
+        elbo = kld-rec_loss
         
-        return elbo, (rec_loss, kld)
+        return jnp.mean(elbo), (jnp.mean(rec_loss), jnp.mean(kld))
     
     @jit
     def update(state:TrainingState, data:Array):
@@ -73,7 +73,7 @@ def train_VAE_model(model:object,
         return TrainingState(new_params, state.state_val, new_opt_state, rng_key), loss
     
     if criterion is None:
-        criterion = jit(lambda x,y: jnp.mean(jnp.sum((x-y)**2, axis=-1)))
+        criterion = jit(lambda x,y: -jnp.sum(jnp.square(x-y), axis=-1))
     
     if optimizer is None:
         optimizer = optax.adam(learning_rate = lr_rate,

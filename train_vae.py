@@ -32,20 +32,17 @@ import pickle
 from vae import train_VAE_model
 from vae.model_loader import mnist_generator, svhn_generator, celeba_generator, load_model
 
-from vae.models.train.mnist import Encoder as mnist_encoder
-from vae.models.train.mnist import Decoder as mnist_decoder
-from vae.models.train.mnist import VAE as mnist_vae
+from vae.models import mnist_encoder
+from vae.models import mnist_decoder
+from vae.models import mnist_vae
 
-from vae.models.train.svhn import Encoder as svhn_encoder
-from vae.models.train.svhn import Decoder as svhn_decoder
-from vae.models.train.svhn import VAE as svhn_vae
+from vae.models import svhn_encoder
+from vae.models import svhn_decoder
+from vae.models import svhn_vae
 
-from vae.models.train.celeba import Encoder as celeba_encoder
-from vae.models.train.celeba import Decoder as celeba_decoder
-from vae.models.train.celeba import VAE as celeba_vae
-
-
-import vae.models.train as train_models
+from vae.models import celeba_encoder
+from vae.models import celeba_decoder
+from vae.models import celeba_vae
 
 #%% Args Parser
 
@@ -70,7 +67,7 @@ def parse_args():
                         type=int)
     parser.add_argument('--seed', default=2712,
                         type=int)
-    parser.add_argument('--save_step', default=1,
+    parser.add_argument('--save_step', default=100,
                         type=int)
     parser.add_argument('--save_path', default='models/',
                         type=str)
@@ -95,8 +92,8 @@ def train_vae()->None:
             
             
             vae = mnist_vae(
-                        encoder=mnist_encoder(latent_dim=8),
-                        decoder=mnist_decoder(),
+                        encoder=mnist_encoder(latent_dim=8, is_training=True),
+                        decoder=mnist_decoder(is_training=True),
             )
           
             return vae(x)
@@ -112,8 +109,8 @@ def train_vae()->None:
             
             
             vae = svhn_vae(
-                        encoder=svhn_encoder(latent_dim=32),
-                        decoder=svhn_decoder(),
+                        encoder=svhn_encoder(latent_dim=32, is_training=True),
+                        decoder=svhn_decoder(is_training=True),
             )
           
             return vae(x)
@@ -128,8 +125,8 @@ def train_vae()->None:
             
             
             vae = celeba_vae(
-                        encoder=celeba_encoder(latent_dim=32),
-                        decoder=celeba_decoder(),
+                        encoder=celeba_encoder(latent_dim=32, is_training=True),
+                        decoder=celeba_decoder(is_training=True),
             )
           
             return vae(x)

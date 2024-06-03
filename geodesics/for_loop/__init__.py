@@ -11,3 +11,4 @@ Created on Sat Jun  1 00:08:41 2024
 from .geodesic_control import GC_LineSearch as GC_LineSearch_for
 from .gradient_descent import GradientDescent as GradientDescent_for
 from .jax_optimization import JAXOptimization as JAXOptimization_for
+from .scipy_optimization import ScipyOptimization as ScipyOptimization_for
