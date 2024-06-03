@@ -20,12 +20,12 @@ def load_manifold(manifold:str="Euclidean", dim = 2):
     
     if manifold == "Euclidean":
         M = nEuclidean(dim=dim)
-        z0 = -jnp.linspace(0,1,2)
-        zT = jnp.ones(2, dtype=jnp.float32)
+        z0 = -jnp.linspace(0,1,dim)
+        zT = jnp.ones(dim, dtype=jnp.float32)
     elif manifold == "Paraboloid":
         M = nParaboloid(dim=dim)
-        z0 = -jnp.linspace(0,1,2)
-        zT = jnp.ones(2, dtype=jnp.float32)
+        z0 = -jnp.linspace(0,1,dim)
+        zT = jnp.ones(dim, dtype=jnp.float32)
     elif manifold == "Sphere":
         M = nSphere(dim=dim)
         z0 = -jnp.linspace(0,1,dim)
