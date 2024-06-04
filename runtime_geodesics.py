@@ -118,10 +118,11 @@ def runtime_geodesics()->None:
     jax_methods = {"adam": optimizers.adam, "sgd": optimizers.sgd}
     scipy_methods = ["BFGS"]
     
-    if not os.path.exists(args.save_path):
-        os.makedirs(args.save_path)
+    save_path = ''.join((args.save_path, args.manifold, '/'))
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
         
-    save_path = ''.join((args.save_path, args.manifold, '.pkl'))
+    save_path = ''.join((save_path, args.manifold, str(args.dim), '.pkl'))
     
     z0, zT, M = load_manifold(args.manifold, args.dim)
     methods = {}
