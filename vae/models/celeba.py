@@ -30,41 +30,34 @@ class Encoder(hk.Module):
                                                                       mode="fan_in",
                                                                       distribution="uniform"
                                                                       ),
-                 is_training:bool=True,
                  ):
         super(Encoder, self).__init__()
         
         self.latent_dim = latent_dim
         self.init = init
-        self.is_training = is_training
     
         self.enc1 = hk.Conv2D(output_channels=32, kernel_shape=4, stride=2, padding="SAME",
                               with_bias=False, w_init=self.init)
-        self.bnorm1 = hk.BatchNorm(create_scale=True, create_offset=True, decay_rate=0.99)
         self.enc2 = hk.Conv2D(output_channels=32, kernel_shape=4, stride=2, padding="SAME",
                               with_bias=False, w_init=self.init)
-        self.bnorm2 = hk.BatchNorm(create_scale=True, create_offset=True, decay_rate=0.99)
         self.enc3 = hk.Conv2D(output_channels=64, kernel_shape=4, stride=2, padding="SAME",
                               with_bias=False, w_init=self.init)
-        self.bnorm3 =hk.BatchNorm(create_scale=True, create_offset=True, decay_rate=0.99)
         self.enc4 = hk.Conv2D(output_channels=64, kernel_shape=4, stride=2, padding="SAME",
                               with_bias=False, w_init=self.init)
-        self.bnorm4 = hk.BatchNorm(create_scale=True, create_offset=True, decay_rate=0.99)
         # fully connected layers for learning representations
         self.fc1 = hk.Linear(output_size=256, w_init=self.init, b_init=self.init)
-        self.bnorm5 = hk.BatchNorm(create_scale=True, create_offset=True, decay_rate=0.99)
         
         self.fc_mu = hk.Linear(output_size=self.latent_dim, w_init=self.init, b_init=self.init)
         self.fc_std = hk.Linear(output_size=self.latent_dim, w_init=self.init, b_init=self.init)
     
     def encoder_model(self, x:Array)->Array:
         
-        x = gelu(self.bnorm1(self.enc1(x), self.is_training))
-        x = gelu(self.bnorm2(self.enc2(x), self.is_training))
-        x = gelu(self.bnorm3(self.enc3(x), self.is_training))
-        x = gelu(self.bnorm4(self.enc4(x), self.is_training))
+        x = gelu(self.enc1(x))
+        x = gelu(self.enc2(x))
+        x = gelu(self.enc3(x))
+        x = gelu(self.enc4(x))
         
-        return gelu(self.bnorm5(self.fc1(x.reshape(x.shape[0], -1)), self.is_training))
+        return gelu(self.fc1(x.reshape(x.shape[0], -1)))
     
     def mu_model(self, x)->Array:
         
@@ -91,35 +84,29 @@ class Decoder(hk.Module):
                                                                       mode="fan_in",
                                                                       distribution="uniform",
                                                                       ),
-                 is_training:bool=True,
                  ):
         super(Decoder, self).__init__()
         """Decoder model."""
         self.init = init
-        self.is_training = is_training
   
         # decoder 
         self.dec1 = hk.Conv2DTranspose(output_channels=64, kernel_shape=4, stride=2, padding="SAME",
                                        with_bias=False, w_init=self.init)
-        self.bnorm1 = hk.BatchNorm(create_scale=True, create_offset=True, decay_rate=0.99)
         self.dec2 = hk.Conv2DTranspose(output_channels=64, kernel_shape=4, stride=2, padding="SAME",
                                        with_bias=False, w_init=self.init)
-        self.bnorm2 = hk.BatchNorm(create_scale=True, create_offset=True, decay_rate=0.99)
         self.dec3 = hk.Conv2DTranspose(output_channels=32, kernel_shape=4, stride=2, padding="SAME",
                                        with_bias=False, w_init=self.init)
-        self.bnorm3 = hk.BatchNorm(create_scale=True, create_offset=True, decay_rate=0.99)
         self.dec4 = hk.Conv2DTranspose(output_channels=32, kernel_shape=4, stride=2, padding="SAME",
                                        with_bias=False, w_init=self.init)
-        self.bnorm4 = hk.BatchNorm(create_scale=True, create_offset=True, decay_rate=0.99)
         self.dec5 = hk.Conv2DTranspose(output_channels=3, kernel_shape=4, stride=4, padding="SAME",
                                        with_bias=False, w_init=self.init)
   
     def decoder_model(self, x:Array)->Array:
         
-        x = gelu(self.bnorm1(self.dec1(x), self.is_training))
-        x = gelu(self.bnorm2(self.dec2(x), self.is_training))
-        x = gelu(self.bnorm3(self.dec3(x), self.is_training))
-        x = gelu(self.bnorm4(self.dec4(x), self.is_training))
+        x = gelu(self.dec1(x))
+        x = gelu(self.dec2(x))
+        x = gelu(self.dec3(x))
+        x = gelu(self.dec4(x))
         x = self.dec5(x)
         
         return x

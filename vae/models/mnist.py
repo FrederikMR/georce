@@ -37,35 +37,29 @@ class Encoder(hk.Module):
                                                                       mode="fan_in",
                                                                       distribution="uniform",
                                                                       ),
-                 is_training:bool=True,
                  ):
         super(Encoder, self).__init__()
         self.latent_dim = latent_dim
         self.init = init
-        self.is_training = is_training
     
         self.enc1 = hk.Conv2D(output_channels=64, kernel_shape=4, stride=2, padding="SAME",
                               with_bias=False, w_init=self.init)
-        self.bnorm1 = hk.BatchNorm(create_scale=True, create_offset=True, decay_rate=0.99)
         self.enc2 = hk.Conv2D(output_channels=64, kernel_shape=4, stride=2, padding="SAME",
                               with_bias=False, w_init=self.init)
-        self.bnorm2 = hk.BatchNorm(create_scale=True, create_offset=True, decay_rate=0.99)
         self.enc3 = hk.Conv2D(output_channels=64, kernel_shape=4, stride=1, padding="SAME",
                               with_bias=False, w_init=self.init)
-        self.bnorm3 = hk.BatchNorm(create_scale=True, create_offset=True, decay_rate=0.99)
         self.enc4 = hk.Conv2D(output_channels=64, kernel_shape=4, stride=2, padding="SAME",
                               with_bias=False, w_init=self.init)
-        self.bnorm4 = hk.BatchNorm(create_scale=True, create_offset=True, decay_rate=0.99)
         
         self.fc_mu = hk.Linear(output_size=self.latent_dim, w_init=self.init, b_init=self.init)
         self.fc_std = hk.Linear(output_size=self.latent_dim, w_init=self.init, b_init=self.init)
     
     def encoder_model(self, x:Array)->Array:
 
-        x = gelu(self.bnorm1(self.enc1(x), self.is_training))
-        x = gelu(self.bnorm2(self.enc2(x), self.is_training))
-        x = gelu(self.bnorm3(self.enc3(x), self.is_training))
-        x = gelu(self.bnorm4(self.enc4(x), self.is_training))
+        x = gelu(self.enc1(x))
+        x = gelu(self.enc2(x))
+        x = gelu(self.enc3(x))
+        x = gelu(self.enc4(x))
         
         return x
     
@@ -96,26 +90,20 @@ class Decoder(hk.Module):
                                                                       mode="fan_in",
                                                                       distribution="uniform",
                                                                       ),
-                 is_training:bool=True,
                  ):
         super(Decoder, self).__init__()
         
         self.init = init
-        self.is_training = is_training
         
         # decoder 
         self.fc0 = hk.Linear(output_size=50, w_init=self.init, b_init=self.init)
-        self.bnorm0 = hk.BatchNorm(create_scale=True, create_offset=True, decay_rate=0.99)
         
         self.dec1 = hk.Conv2DTranspose(output_channels=64, kernel_shape=4, stride=2, padding="SAME",
                                        with_bias=False, w_init=self.init)
-        self.bnorm1 = hk.BatchNorm(create_scale=True, create_offset=True, decay_rate=0.99)
         self.dec2 = hk.Conv2DTranspose(output_channels=32, kernel_shape=4, stride=1, padding="SAME",
                                        with_bias=False, w_init=self.init)
-        self.bnorm2 = hk.BatchNorm(create_scale=True, create_offset=True, decay_rate=0.99)
         self.dec3 = hk.Conv2DTranspose(output_channels=16, kernel_shape=4, stride=1, padding="SAME",
                                        with_bias=False, w_init=self.init)
-        self.bnorm3 = hk.BatchNorm(create_scale=True, create_offset=True, decay_rate=0.99)
         
         self.fc1 = hk.Linear(output_size=28*28, w_init=self.init, b_init=self.init)
         
@@ -125,10 +113,10 @@ class Decoder(hk.Module):
         
         batch_dim = x.shape[0]
         x = x.reshape(batch_dim, -1)
-        x = gelu(self.bnorm0(self.fc0(x), self.is_training)).reshape(batch_dim, 1, 1, -1)
-        x = gelu(self.bnorm1(self.dec1(x), self.is_training))
-        x = gelu(self.bnorm2(self.dec2(x), self.is_training))
-        x = gelu(self.bnorm3(self.dec3(x), self.is_training))
+        x = gelu(self.fc0(x)).reshape(batch_dim, 1, 1, -1)
+        x = gelu(self.dec1(x))
+        x = gelu(self.dec2(x))
+        x = gelu(self.dec3(x))
         
         return self.fc1(x.reshape(batch_dim, -1)).reshape(batch_dim, 28, 28, 1)
     
@@ -154,8 +142,9 @@ class VAE(hk.Module):
         
         return mu+std*jrandom.normal(hk.next_rng_key(), mu.shape)
 
-    def __call__(self, x: Array, is_training=True) -> VAEOutput:
+    def __call__(self, x: Array) -> VAEOutput:
         """Forward pass of the variational autoencoder."""
+
         mu_zx, std_zx = self.encoder(x)
 
         z = self.sample(mu_zx, std_zx)

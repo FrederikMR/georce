@@ -87,13 +87,11 @@ def train_vae()->None:
                                    batch_size=args.batch_size,
                                    split=f'train[:{split}%]')
         
-        @hk.transform_with_state
+        @hk.transform
         def vae_model(x):
-            
-            
             vae = mnist_vae(
-                        encoder=mnist_encoder(latent_dim=8, is_training=True),
-                        decoder=mnist_decoder(is_training=True),
+                        encoder=mnist_encoder(latent_dim=8),
+                        decoder=mnist_decoder(),
             )
           
             return vae(x)
@@ -104,13 +102,12 @@ def train_vae()->None:
                                   seed=args.seed, 
                                   split=f'train[:{split}%]')
         
-        @hk.transform_with_state
+        @hk.transform
         def vae_model(x):
-            
-            
+
             vae = svhn_vae(
-                        encoder=svhn_encoder(latent_dim=32, is_training=True),
-                        decoder=svhn_decoder(is_training=True),
+                        encoder=svhn_encoder(latent_dim=32),
+                        decoder=svhn_decoder(),
             )
           
             return vae(x)
@@ -120,13 +117,12 @@ def train_vae()->None:
                                     seed=args.seed, 
                                     split=args.split)
         
-        @hk.transform_with_state
+        @hk.transform
         def vae_model(x):
-            
-            
+
             vae = celeba_vae(
-                        encoder=celeba_encoder(latent_dim=32, is_training=True),
-                        decoder=celeba_decoder(is_training=True),
+                        encoder=celeba_encoder(latent_dim=32),
+                        decoder=celeba_decoder(),
             )
           
             return vae(x)
