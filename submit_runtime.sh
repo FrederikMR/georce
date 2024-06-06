@@ -19,6 +19,8 @@ module swap python3/3.10.12
 
 python3 runtime_geodesics.py \
     --manifold Paraboloid \
+    --svhn_dir ../../Data/SVHN/ \
+    --celeba_dir ../../Data/CelebA/ \
     --dim 100 \
     --T 100 \
     --scipy_methods 1 \

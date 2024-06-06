@@ -21,7 +21,7 @@ class ScipyOptimization(ABC):
                  M:RiemannianManifold,
                  init_fun:Callable[[Array, Array, int], Array]=None,
                  T:int=100,
-                 tol:float=1e-8,
+                 tol:float=1e-4,
                  max_iter:int=1000,
                  method:str='BFGS',
                  )->None:
@@ -41,6 +41,8 @@ class ScipyOptimization(ABC):
         self.method = method
         self.tol = tol
         self.max_iter = max_iter
+        
+        self.save_zt = []
         
         self.dim = None
         
@@ -74,9 +76,18 @@ class ScipyOptimization(ABC):
         
         return grad(lambda z: self.energy(z))(zt)
     
+    def callback(self,
+                 zt:Array
+                 )->Array:
+        
+        self.save_zt.append(zt.reshape(-1, self.dim))
+        
+        return
+    
     def __call__(self, 
                  z0:Array,
                  zT:Array,
+                 step:str="while",
                  )->Array:
         
         self.dim = len(z0)
@@ -86,15 +97,32 @@ class ScipyOptimization(ABC):
         self.zT = zT
         self.G0 = self.M.G(z0)
         
-        res = minimize(fun = self.energy, 
-                       x0=zt.reshape(-1), 
-                       method=self.method, 
-                       jac=self.Denergy)
+        if step == "while":
+            res = minimize(fun = self.energy, 
+                           x0=zt.reshape(-1), 
+                           method=self.method, 
+                           jac=self.Denergy)
         
-        zt = res.x.reshape(-1,self.dim)
-        zt = jnp.vstack((z0, zt, zT))
+            zt = res.x.reshape(-1,self.dim)
+            zt = jnp.vstack((z0, zt, zT))
+            grad =  res.jac.reshape(-1,self.dim)
+            idx = res.nit
+        elif step == "for":
+            res = minimize(fun = self.energy, 
+                           x0=zt.reshape(-1), 
+                           method=self.method, 
+                           jac=self.Denergy,
+                           callback=self.callback)
+            
+            zt = jnp.stack([zt.reshape(-1,self.dim) for zt in self.save_zt])
+            
+            grad = vmap(self.Denergy)(zt)
+            zt = vmap(lambda z: jnp.vstack((z0, z, zT)))(zt)
+            idx = self.max_iter
+        else:
+            raise ValueError(f"step argument should be either for or while. Passed argument is {step}")
         
-        return zt, res.jac.reshape(-1,self.dim), res.nit
+        return zt, grad, idx
     
     
     

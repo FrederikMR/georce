@@ -113,6 +113,9 @@ class Decoder(hk.Module):
     
     def __call__(self, z: Array) -> Array:
         
+        batch = z.shape[0]
+        z = z.reshape(batch, 1, 1, -1)
+        
         return self.decoder_model(z)
   
 #%% Riemannian Score Variational Prior

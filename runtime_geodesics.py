@@ -24,20 +24,24 @@ import pickle
 #argparse
 import argparse
 
-from typing import List, Dict
+from typing import Dict
 
 #JAX Optimization
 from jax.example_libraries import optimizers
 
 from load_manifold import load_manifold
-from geodesics import GradientDescent, JAXOptimization, ScipyOptimization, GC_LineSearch
+from geodesics import GradientDescent, JAXOptimization, ScipyOptimization, GEORCE
 
 #%% Args Parser
 
 def parse_args():
     parser = argparse.ArgumentParser()
     # File-paths
-    parser.add_argument('--manifold', default="Sphere",
+    parser.add_argument('--manifold', default="Ellipsoid",
+                        type=str)
+    parser.add_argument('--svhn_dir', default="../../../Data/SVHN/",
+                        type=str)
+    parser.add_argument('--celeba_dir', default="../../../Data/CelebA/",
                         type=str)
     parser.add_argument('--dim', default=2,
                         type=int)
@@ -53,15 +57,15 @@ def parse_args():
                         type=float)
     parser.add_argument('--gradient_lr_rate', default=1.0,
                         type=float)
-    parser.add_argument('--gc_decay_rate', default=0.5,
+    parser.add_argument('--gc_decay_rate', default=0.9,
                         type=float)
-    parser.add_argument('--gradient_decay_rate', default=0.5,
+    parser.add_argument('--gradient_decay_rate', default=0.9,
                         type=float)
     parser.add_argument('--tol', default=1e-4,
                         type=float)
     parser.add_argument('--max_iter', default=1000,
                         type=int)
-    parser.add_argument('--line_search_iter', default=100,
+    parser.add_argument('--line_search_iter', default=1000,
                         type=int)
     parser.add_argument('--number_repeats', default=5,
                         type=int)
@@ -69,7 +73,7 @@ def parse_args():
                         type=int)
     parser.add_argument('--seed', default=2712,
                         type=int)
-    parser.add_argument('--save_path', default='../timing/',
+    parser.add_argument('--save_path', default='timing/',
                         type=str)
 
     args = parser.parse_args()
@@ -115,7 +119,7 @@ def runtime_geodesics()->None:
     
     args = parse_args()
     
-    jax_methods = {"adam": optimizers.adam, "sgd": optimizers.sgd}
+    jax_methods = {"ADAM": optimizers.adam, "SGD": optimizers.sgd}
     scipy_methods = ["BFGS"]
     
     save_path = ''.join((args.save_path, args.manifold, '/'))
@@ -123,21 +127,25 @@ def runtime_geodesics()->None:
         os.makedirs(save_path)
         
     save_path = ''.join((save_path, args.manifold, str(args.dim), '.pkl'))
+    if os.path.exists(save_path):
+        os.remove(save_path)
     
-    z0, zT, M = load_manifold(args.manifold, args.dim)
+    z0, zT, M = load_manifold(args.manifold, args.dim, svhn_path=args.svhn_dir,
+                              celeba_path=args.celeba_dir)
     methods = {}
-    ## Gradient descent
-    print("Computing Gradient Descent")
-    Geodesic = GradientDescent(M = M,
-                               init_fun=None,
-                               lr_rate=args.gradient_lr_rate,
-                               decay_rate=args.gradient_decay_rate,
-                               T=args.T,
-                               max_iter=args.max_iter,
-                               tol=args.tol,
-                               line_search_iter=args.line_search_iter
-                               )
-    methods['gradient'] = estimate_method(jit(Geodesic), z0, zT, M)
+    ## Geodesic Control
+    print("Computing GEORCE")
+    Geodesic = GEORCE(M=M,
+                      init_fun=None,
+                      lr_rate=args.gc_lr_rate,
+                      T=args.T,
+                      decay_rate=args.gc_decay_rate,
+                      tol=args.tol,
+                      max_iter=args.max_iter,
+                      line_search_iter=args.line_search_iter
+                      )
+    methods['GEORCE'] = estimate_method(jit(Geodesic), z0, zT, M)
+    save_times(methods, save_path)
     ## Init Length
     zt = Geodesic.init_fun(z0,zT,args.T)
     init_length = M.length(zt)
@@ -174,23 +182,10 @@ def runtime_geodesics()->None:
         true['max_iter'] = args.max_iter
         methods['ground_truth'] = true
     save_times(methods, save_path)
-    ## Geodesic Control
-    print("Computing Geodesic Control")
-    Geodesic = GC_LineSearch(M=M,
-                             init_fun=None,
-                             lr_rate=args.gc_lr_rate,
-                             T=args.T,
-                             decay_rate=args.gc_decay_rate,
-                             tol=args.tol,
-                             max_iter=args.max_iter,
-                             line_search_iter=args.line_search_iter
-                             )
-    methods['geodesic_control'] = estimate_method(jit(Geodesic), z0, zT, M)
-    save_times(methods, save_path)
     ## JAX
     if args.jax_methods:
-        print("Computing JAX")
         for opt in jax_methods:
+            print(f"Computing {opt}")
             Geodesic = JAXOptimization(M = M,
                                        init_fun=None,
                                        lr_rate=args.jax_lr_rate,
@@ -201,6 +196,19 @@ def runtime_geodesics()->None:
                                        )
             methods[opt] = estimate_method(jit(Geodesic), z0, zT, M)
             save_times(methods, save_path)
+    ##Gradient Descent
+    print("Computing Gradient Descent")
+    Geodesic = GradientDescent(M = M,
+                               init_fun=None,
+                               lr_rate=args.gradient_lr_rate,
+                               decay_rate=args.gradient_decay_rate,
+                               T=args.T,
+                               max_iter=args.max_iter,
+                               tol=args.tol,
+                               line_search_iter=args.line_search_iter
+                               )
+    methods['Gradient Descent'] = estimate_method(jit(Geodesic), z0, zT, M)
+    save_times(methods, save_path)
     ## Scipy
     if args.scipy_methods:
         print("Computing Scipy")

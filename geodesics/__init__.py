@@ -10,7 +10,5 @@ Created on Sat May 25 14:29:35 2024
 
 from .gradient_descent import GradientDescent
 from .jax_optimization import JAXOptimization
-from .geodesic_control import GC_LineSearch
+from .georce import GEORCE
 from .scipy_optimization import ScipyOptimization
-
-from .for_loop import *

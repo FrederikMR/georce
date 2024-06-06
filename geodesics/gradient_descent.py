@@ -22,11 +22,11 @@ class GradientDescent(ABC):
                  M:RiemannianManifold,
                  init_fun:Callable[[Array, Array, int], Array]=None,
                  lr_rate:float=1.0,
-                 decay_rate:float=0.95,
-                 T:int=10,
+                 decay_rate:float=0.90,
+                 T:int=100,
                  max_iter:int=1000,
-                 tol:float=1e-8,
-                 line_search_iter:int=10,
+                 tol:float=1e-4,
+                 line_search_iter:int=1000,
                  )->None:
         
         self.M = M
@@ -88,9 +88,9 @@ class GradientDescent(ABC):
 
         return (norm_grad>self.tol) & (idx < self.max_iter)
     
-    def gradient_step(self, 
-                      carry:Tuple[Array,Array, int]
-                      )->Array:
+    def while_step(self,
+                   carry:Tuple[Array,Array, int]
+                   )->Array:
         
         zt, grad, idx = carry
         
@@ -100,9 +100,23 @@ class GradientDescent(ABC):
         
         return (zt, grad, idx+1)
     
+    def for_step(self,
+                 carry:Array,
+                 idx:int,
+                 )->Array:
+        
+        zt = carry
+        
+        grad = self.Denergy(zt)
+        alpha = self.line_search(zt, grad)
+        zt -= alpha*grad 
+        
+        return (zt,)*2
+    
     def __call__(self, 
                  z0:Array,
                  zT:Array,
+                 step:str="while",
                  )->Array:
         
         zt = self.init_fun(z0,zT,self.T)
@@ -117,13 +131,27 @@ class GradientDescent(ABC):
         self.zT = zT
         self.G0 = self.M.G(z0)
         
-        grad = self.Denergy(zt)
+        if step == "while":
+            grad = self.Denergy(zt)
         
-        zt, grad, idx = lax.while_loop(self.cond_fun, 
-                                       self.gradient_step,
-                                       init_val=(zt, grad, 0)
-                                       )
+            zt, grad, idx = lax.while_loop(self.cond_fun, 
+                                           self.while_step,
+                                           init_val=(zt, grad, 0)
+                                           )
         
-        zt = jnp.vstack((z0, zt, zT))
-        
+            zt = jnp.vstack((z0, zt, zT))
+            
+        elif step=="for":
+            _, val = lax.scan(self.for_step,
+                              init=zt,
+                              xs=jnp.ones(self.max_iter),
+                              )
+            zt = val
+            
+            grad = vmap(self.Denergy)(zt)
+            zt = vmap(lambda z: jnp.vstack((z0, z, zT)))(zt)
+            idx = self.max_iter
+        else:
+            raise ValueError(f"step argument should be either for or while. Passed argument is {step}")
+            
         return zt, grad, idx

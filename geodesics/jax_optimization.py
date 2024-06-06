@@ -22,9 +22,9 @@ class JAXOptimization(ABC):
                  init_fun:Callable[[Array, Array, int], Array]=None,
                  lr_rate:float=1.0,
                  optimizer:Callable=None,
-                 T:int=10,
+                 T:int=100,
                  max_iter:int=1000,
-                 tol:float=1e-8,
+                 tol:float=1e-4,
                  )->None:
         
         self.M = M
@@ -86,9 +86,9 @@ class JAXOptimization(ABC):
 
         return (norm_grad>self.tol) & (idx < self.max_iter)
     
-    def gradient_step(self, 
-                      carry:Tuple[Array, Array, Array, int]
-                      )->Array:
+    def while_step(self,
+                   carry:Tuple[Array, Array, Array, int],
+                   )->Array:
         
         zt, grad, opt_state, idx = carry
         
@@ -99,9 +99,23 @@ class JAXOptimization(ABC):
         
         return (zt, grad, opt_state, idx+1)
     
+    def for_step(self,
+                 carry:Tuple[Array, Array],
+                 idx:int,
+                 )->Array:
+        
+        zt, opt_state = carry
+        
+        grad = self.Denergy(zt)
+        opt_state = self.opt_update(idx, grad, opt_state)
+        zt = self.get_params(opt_state)
+        
+        return ((zt, opt_state),)*2
+    
     def __call__(self, 
                  z0:Array,
                  zT:Array,
+                 step:str="while",
                  )->Array:
         
         zt = self.init_fun(z0,zT,self.T)
@@ -110,14 +124,29 @@ class JAXOptimization(ABC):
         self.zT = zT
         self.G0 = self.M.G(z0)
         
-        grad = self.Denergy(zt)
         opt_state = self.opt_init(zt)
         
-        zt, grad, _, idx = lax.while_loop(self.cond_fun, 
-                                self.gradient_step,
-                                init_val=(zt, grad, opt_state, 0)
-                                )
+        if step == "while":
+            grad = self.Denergy(zt)
         
-        zt = jnp.vstack((z0, zt, zT))
+            zt, grad, _, idx = lax.while_loop(self.cond_fun, 
+                                              self.while_step,
+                                              init_val=(zt, grad, opt_state, 0)
+                                              )
+        
+            zt = jnp.vstack((z0, zt, zT))
+        elif step == "for":
+            _, val = lax.scan(self.for_step,
+                              init=(zt, opt_state),
+                              xs = jnp.ones(self.max_iter),
+                              )
+            
+            zt = val[0]
+            
+            grad = vmap(self.Denergy)(zt)
+            zt = vmap(lambda z: jnp.vstack((z0, z, zT)))(zt)
+            idx = self.max_iter
+        else:
+            raise ValueError(f"step argument should be either for or while. Passed argument is {step}")
         
         return zt, grad, idx
