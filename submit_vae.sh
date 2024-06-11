@@ -1,6 +1,6 @@
 #!/bin/sh
-#BSUB -q gpua40
-#BSUB -J celeba
+#BSUB -q gpua100
+#BSUB -J svhn
 #BSUB -n 4
 #BSUB -gpu "num=1:mode=exclusive_process"
 #BSUB -W 24:00
@@ -18,14 +18,14 @@ module swap cudnn/v8.9.1.23-prod-cuda-12.X
 module swap python3/3.10.12
 
 python3 train_vae.py \
-    --model celeba \
+    --model svhn \
     --svhn_dir ../../Data/SVHN/ \
     --celeba_dir ../../Data/CelebA/ \
     --lr_rate 0.0002 \
     --con_training 0 \
     --split 0.8 \
     --batch_size 100 \
-    --epochs 10000000 \
+    --epochs 100000000 \
     --seed 2712 \
     --save_step 1000 \
     --save_path models/
