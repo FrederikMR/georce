@@ -37,7 +37,7 @@ from geodesics import GradientDescent, JAXOptimization, ScipyOptimization, GEORC
 def parse_args():
     parser = argparse.ArgumentParser()
     # File-paths
-    parser.add_argument('--manifold', default="Ellipsoid",
+    parser.add_argument('--manifold', default="Sphere",
                         type=str)
     parser.add_argument('--svhn_dir', default="../../../Data/SVHN/",
                         type=str)
@@ -65,7 +65,7 @@ def parse_args():
                         type=float)
     parser.add_argument('--max_iter', default=1000,
                         type=int)
-    parser.add_argument('--line_search_iter', default=1000,
+    parser.add_argument('--line_search_iter', default=100,
                         type=int)
     parser.add_argument('--number_repeats', default=5,
                         type=int)
@@ -87,10 +87,12 @@ def estimate_method(Geodesic, z0, zT, M):
     
     method = {} 
     zt, grad, grad_idx = Geodesic(z0,zT)
+    print("\t-Estimate Computed")
     timing = []
     timing = timeit.repeat(lambda: Geodesic(z0,zT)[0].block_until_ready(), 
                            number=args.number_repeats, 
                            repeat=args.timing_repeats)
+    print("\t-Timing Computed")
     timing = jnp.stack(timing)
     length = M.length(zt)
     method['grad_norm'] = jnp.linalg.norm(grad)
@@ -126,7 +128,7 @@ def runtime_geodesics()->None:
     if not os.path.exists(save_path):
         os.makedirs(save_path)
         
-    save_path = ''.join((save_path, args.manifold, str(args.dim), '.pkl'))
+    save_path = ''.join((save_path, args.manifold, '_d=', str(args.dim), '_T=', str(args.T), '.pkl'))
     if os.path.exists(save_path):
         os.remove(save_path)
     

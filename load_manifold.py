@@ -11,6 +11,7 @@ Created on Thu Apr 18 09:47:42 2024
 #%% Modules
 
 import jax.numpy as jnp
+from jax import jit
 
 import haiku as hk
 
@@ -86,9 +87,17 @@ def load_manifold(manifold:str="Euclidean",
         
             return decoder(x)
         
-        celeba_encoder_fun = lambda x: celeba_tencoder.apply(celeba_state.params, None, x.reshape(-1,64,64,3))[0].reshape(-1,32).squeeze()
-        celeba_decoder_fun = lambda x: celeba_tdecoder.apply(celeba_state.params, None, x.reshape(-1,32)).reshape(-1,64*64*3).squeeze()
-        celeba_vae_fun = lambda x: celeba_tvae.apply(celeba_state.params, celeba_state.rng_key, x)
+        celeba_encoder_fun = jit(lambda x: celeba_tencoder.apply(celeba_state.params, 
+                                                                 None, 
+                                                                 x.reshape(-1,64,64,3)
+                                                                 )[0].reshape(-1,32).squeeze())
+        celeba_decoder_fun = jit(lambda x: celeba_tdecoder.apply(celeba_state.params, 
+                                                                 None, 
+                                                                 x.reshape(-1,32)
+                                                                 ).reshape(-1,64*64*3).squeeze())
+        celeba_vae_fun = jit(lambda x: celeba_tvae.apply(celeba_state.params, 
+                                                         celeba_state.rng_key, 
+                                                         x))
         
         M = VAEManifold(dim=32,
                         emb_dim=64*64*3,
@@ -135,9 +144,17 @@ def load_manifold(manifold:str="Euclidean",
         
             return decoder(x)
         
-        svhn_encoder_fun = lambda x: svhn_tencoder.apply(svhn_state.params, None, x.reshape(-1,32,32,3))[0].reshape(-1,32).squeeze()
-        svhn_decoder_fun = lambda x: svhn_tdecoder.apply(svhn_state.params, None, x.reshape(-1,32)).reshape(-1,32*32*3).squeeze()
-        svhn_vae_fun = lambda x: svhn_tvae.apply(svhn_state.params, svhn_state.rng_key, x)
+        svhn_encoder_fun = jit(lambda x: svhn_tencoder.apply(svhn_state.params, 
+                                                             None, 
+                                                             x.reshape(-1,32,32,3)
+                                                             )[0].reshape(-1,32).squeeze())
+        svhn_decoder_fun = jit(lambda x: svhn_tdecoder.apply(svhn_state.params, 
+                                                             None, 
+                                                             x.reshape(-1,32)
+                                                             ).reshape(-1,32*32*3).squeeze())
+        svhn_vae_fun = jit(lambda x: svhn_tvae.apply(svhn_state.params, 
+                                                     svhn_state.rng_key, 
+                                                     x))
         
         M = VAEManifold(dim=32,
                         emb_dim=32*32*3,
@@ -181,9 +198,17 @@ def load_manifold(manifold:str="Euclidean",
         
             return decoder(x)
         
-        mnist_encoder_fun = lambda x: mnist_tencoder.apply(mnist_state.params, None, x.reshape(-1,28,28,1))[0].reshape(-1,8).squeeze()
-        mnist_decoder_fun = lambda x: mnist_tdecoder.apply(mnist_state.params, None, x.reshape(-1,8)).reshape(-1,28*28).squeeze()
-        mnist_vae_fun = lambda x: mnist_tvae.apply(mnist_state.params, mnist_state.rng_key, x)
+        mnist_encoder_fun = jit(lambda x: mnist_tencoder.apply(mnist_state.params, 
+                                                               None, 
+                                                               x.reshape(-1,28,28,1)
+                                                               )[0].reshape(-1,8).squeeze())
+        mnist_decoder_fun = jit(lambda x: mnist_tdecoder.apply(mnist_state.params, 
+                                                               None, 
+                                                               x.reshape(-1,8)
+                                                               ).reshape(-1,28*28).squeeze())
+        mnist_vae_fun = jit(lambda x: mnist_tvae.apply(mnist_state.params, 
+                                                       mnist_state.rng_key, 
+                                                       x))
         
         M = VAEManifold(dim=8,
                         emb_dim=28*28,

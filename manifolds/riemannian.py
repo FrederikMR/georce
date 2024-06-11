@@ -21,8 +21,8 @@ class RiemannianManifold(ABC):
                  invF:Callable[[Array],Array]=None,
                  )->None:
         
-        self.F = F
-        self.invF = invF
+        self.F = jit(F)
+        self.invF = jit(invF)
         if ((G is None) and (F is None)):
             raise ValueError("Both the metric, g, and chart, F, is not defined")
         elif ((G is not None) and (F is not None)):
