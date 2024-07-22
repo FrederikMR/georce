@@ -12,7 +12,7 @@ Created on Mon May 27 13:40:59 2024
 
 #%% Modules
 
-from setup import *
+from vae.setup import *
 
 #%% Batch class
 

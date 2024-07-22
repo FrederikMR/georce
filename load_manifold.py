@@ -15,7 +15,7 @@ from jax import jit
 
 import haiku as hk
 
-from manifolds import nSphere, nEllipsoid, nEuclidean, nParaboloid, HyperbolicParaboloid, VAEManifold
+from geometry.manifolds.riemannian import nSphere, nEllipsoid, nEuclidean, nParaboloid, HyperbolicParaboloid, VAEManifold, SPDN
 
 from vae.model_loader import mnist_generator, svhn_generator, celeba_generator, load_model
 
@@ -43,6 +43,12 @@ def load_manifold(manifold:str="Euclidean",
         M = nEuclidean(dim=dim)
         z0 = -jnp.linspace(0,1,dim)
         zT = jnp.ones(dim, dtype=jnp.float32)
+    if manifold == "SPDN":
+        M = SPDN(N=dim)
+        x0 = jnp.eye(dim)
+        
+        z0 = M.invf(x0)
+        zT = jnp.linspace(0.5,1.0, M.dim)
     elif manifold == "Paraboloid":
         M = nParaboloid(dim=dim)
         z0 = -jnp.linspace(0,1,dim)

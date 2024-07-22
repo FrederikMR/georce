@@ -30,14 +30,14 @@ from typing import Dict
 from jax.example_libraries import optimizers
 
 from load_manifold import load_manifold
-from geodesics import GradientDescent, JAXOptimization, ScipyOptimization, GEORCE
+from geometry.geodesics.riemannian import GradientDescent, JAXOptimization, ScipyOptimization, GEORCE
 
 #%% Args Parser
 
 def parse_args():
     parser = argparse.ArgumentParser()
     # File-paths
-    parser.add_argument('--manifold', default="Sphere",
+    parser.add_argument('--manifold', default="SPDN",
                         type=str)
     parser.add_argument('--svhn_dir', default="../../../Data/SVHN/",
                         type=str)
@@ -57,9 +57,9 @@ def parse_args():
                         type=float)
     parser.add_argument('--gradient_lr_rate', default=1.0,
                         type=float)
-    parser.add_argument('--gc_decay_rate', default=0.9,
+    parser.add_argument('--gc_decay_rate', default=0.5,
                         type=float)
-    parser.add_argument('--gradient_decay_rate', default=0.9,
+    parser.add_argument('--gradient_decay_rate', default=0.5,
                         type=float)
     parser.add_argument('--tol', default=1e-4,
                         type=float)
@@ -139,12 +139,14 @@ def runtime_geodesics()->None:
     print("Computing GEORCE")
     Geodesic = GEORCE(M=M,
                       init_fun=None,
-                      lr_rate=args.gc_lr_rate,
                       T=args.T,
-                      decay_rate=args.gc_decay_rate,
                       tol=args.tol,
                       max_iter=args.max_iter,
-                      line_search_iter=args.line_search_iter
+                      line_search_method="soft",
+                      line_search_params={'alpha':args.gc_lr_rate,
+                                          'rho':args.gc_decay_rate,
+                                          'max_iter':args.line_search_iter
+                                          }
                       )
     methods['GEORCE'] = estimate_method(jit(Geodesic), z0, zT, M)
     save_times(methods, save_path)
@@ -163,6 +165,8 @@ def runtime_geodesics()->None:
     save_times(methods, save_path)
     ## True Length
     if hasattr(M, 'dist'):
+        #curve = M.Geodesic(z0,zT)
+        #true_dist = M.length(curve)
         true_dist = M.dist(z0,zT)
         true = {}
         true['length'] = true_dist
@@ -202,12 +206,14 @@ def runtime_geodesics()->None:
     print("Computing Gradient Descent")
     Geodesic = GradientDescent(M = M,
                                init_fun=None,
-                               lr_rate=args.gradient_lr_rate,
-                               decay_rate=args.gradient_decay_rate,
                                T=args.T,
                                max_iter=args.max_iter,
                                tol=args.tol,
-                               line_search_iter=args.line_search_iter
+                               line_search_method="soft",
+                               line_search_params={'alpha':args.gradient_lr_rate,
+                                                   'rho':args.gradient_decay_rate,
+                                                   'max_iter':args.line_search_iter
+                                                   }
                                )
     methods['Gradient Descent'] = estimate_method(jit(Geodesic), z0, zT, M)
     save_times(methods, save_path)

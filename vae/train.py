@@ -11,7 +11,7 @@ Created on Sun May 26 00:08:19 2024
 
 #%% Modules
 
-from setup import *
+from vae.setup import *
 
 from .model_loader import save_model
 

@@ -12,7 +12,7 @@ Created on Fri Sep 29 13:05:11 2023
 
 #%% Modules
 
-from setup import *
+from vae.setup import *
 
 #%% VAE Output
 
