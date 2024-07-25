@@ -19,17 +19,13 @@ module swap python3/3.10.12
 
 python3 runtime_geodesics.py \
     --manifold Ellipsoid \
-    --svhn_dir ../../Data/SVHN/ \
-    --celeba_dir ../../Data/CelebA/ \
+    --geometry Riemannian \
     --dim 100 \
     --T 100 \
+    --v0 1.5 \
     --scipy_methods 1 \
     --jax_methods 1 \
     --jax_lr_rate 0.01 \
-    --gc_lr_rate 1.0 \
-    --gradient_lr_rate 1.0 \
-    --gc_decay_rate 0.5 \
-    --gradient_decay_rate 0.5 \
     --tol 1e-4 \
     --max_iter 1000 \
     --line_search_iter 100 \

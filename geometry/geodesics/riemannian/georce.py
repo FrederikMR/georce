@@ -24,7 +24,7 @@ class GEORCE(ABC):
                  T:int=100,
                  tol:float=1e-4,
                  max_iter:int=1000,
-                 line_search_method:str="exact",
+                 line_search_method:str="soft",
                  line_search_params:Dict = {},
                  )->None:
         

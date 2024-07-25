@@ -133,7 +133,6 @@ class ScipyOptimization(ABC):
                           tol=self.tol,
                           options={'maxiter': self.max_iter}
                           )
-            print(len(self.save_zt))
             zt = jnp.stack([zt.reshape(-1,self.dim) for zt in self.save_zt])
             
             grad = vmap(self.Denergy)(zt)

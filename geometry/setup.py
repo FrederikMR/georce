@@ -9,7 +9,7 @@ Created on Mon Jun 24 10:46:44 2024
 #%% Modules
 
 from jax import Array
-from jax import vmap, grad, jacfwd, jacrev
+from jax import vmap, grad, jacfwd, jacrev, hessian
 from jax import lax
 
 import jax.numpy as jnp

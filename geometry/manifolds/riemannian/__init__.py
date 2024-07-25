@@ -10,6 +10,9 @@ Created on Sat May 25 14:35:56 2024
 
 from .manifold import RiemannianManifold
 from .SPDN import SPDN
+from .H2 import H2
+from .Cylinder import Cylinder
+from .Landmarks import Landmarks
 from .gp_riemannian import GPRiemannian
 from .HyperbolicParaboloid import HyperbolicParaboloid
 from .nParaboloid import nParaboloid

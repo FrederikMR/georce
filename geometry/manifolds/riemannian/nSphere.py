@@ -32,6 +32,26 @@ class nSphere(nEllipsoid):
         
         return f"Sphere of dimension {self.dim} in {self.coordinates} coordinates equipped with the pull back metric"
     
+    def Geodesic(self,
+                 x:Array,
+                 y:Array,
+                 t_grid:Array=None,
+                 )->Array:
+        
+        if t_grid is None:
+            t_grid = jnp.linspace(0.,1.,99, endpoint=False)[1:]
+        
+        x = self.f(x)
+        y = self.f(y)
+        
+        x_s = x/self.params
+        y_s = y/self.params
+        
+        v = self.Log(x,y)
+        
+        gamma = self.params*vmap(lambda t: self.Exp(x_s, v,t))(t_grid)
+        
+        return jnp.vstack((x,gamma,y))
     
     
     
