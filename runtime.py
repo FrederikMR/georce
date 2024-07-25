@@ -59,7 +59,7 @@ def parse_args():
                         type=float)
     parser.add_argument('--tol', default=1e-4,
                         type=float)
-    parser.add_argument('--max_iter', default=100000,
+    parser.add_argument('--max_iter', default=1000,
                         type=int)
     parser.add_argument('--line_search_iter', default=100,
                         type=int)
