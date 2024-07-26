@@ -127,7 +127,7 @@ def riemannian_runtime()->None:
     args = parse_args()
     
     jax_methods = {"ADAM": optimizers.adam, "SGD": optimizers.sgd}
-    scipy_methods = ["BFGS", 'CG']
+    scipy_methods = ["BFGS", 'CG', 'dogleg', 'trust-ncg', 'trust-exact']
     
     save_path = ''.join((args.save_path, f'riemannian/{args.manifold}/'))
     if not os.path.exists(save_path):

@@ -86,6 +86,19 @@ class ScipyOptimization(ABC):
         
         return grad(lambda z: self.energy(z))(zt)
     
+    def HessEnergy(self,
+                   zt:Array,
+                   )->Array:
+        
+        return hessian(self.energy)(zt)
+    
+    def HessPEnergy(self,
+                   zt:Array,
+                   p:Array,
+                   )->Array:
+        
+        return jnp.dot(hessian(self.energy)(zt), p)
+    
     def callback(self,
                  zt:Array
                  )->Array:
@@ -116,6 +129,8 @@ class ScipyOptimization(ABC):
                           x0=zt.reshape(-1), 
                           method=self.method, 
                           jac=self.Denergy,
+                          hess=self.HessEnergy,
+                          hessp=self.HessPEnergy,
                           tol=self.tol,
                           options={'maxiter': self.max_iter}
                           )
@@ -129,6 +144,8 @@ class ScipyOptimization(ABC):
                           x0=zt.reshape(-1),
                           method=self.method,
                           jac=self.Denergy,
+                          hess=self.HessEnergy,
+                          hessp=self.HessPEnergy,
                           callback=self.callback,
                           tol=self.tol,
                           options={'maxiter': self.max_iter}
