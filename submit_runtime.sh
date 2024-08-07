@@ -1,6 +1,6 @@
 #!/bin/sh
 #BSUB -q gpuv100
-#BSUB -J FT2_100
+#BSUB -J FParaboloid100_10
 #BSUB -n 4
 #BSUB -gpu "num=1:mode=exclusive_process"
 #BSUB -W 24:00
@@ -18,10 +18,10 @@ module swap cudnn/v8.9.1.23-prod-cuda-12.X
 module swap python3/3.10.12
 
 python3 runtime.py \
-    --manifold T2 \
+    --manifold Paraboloid \
     --geometry Finsler \
-    --dim 2 \
-    --T 100 \
+    --dim 100 \
+    --T 10 \
     --v0 1.5 \
     --scipy_methods 1 \
     --jax_methods 1 \
