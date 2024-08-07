@@ -24,6 +24,7 @@ def load_manifold(manifold:str="Euclidean",
                   dim:int = 2,
                   ):
     
+    rho = 0.5 #default
     if manifold == "Euclidean":
         M = nEuclidean(dim=dim)
         z0 = -jnp.linspace(0,1,dim)
@@ -66,6 +67,7 @@ def load_manifold(manifold:str="Euclidean",
         M = T2(R=3.0, r=1.0)
         z0 = jnp.array([0.0, 0.0])
         zT = jnp.array([5*jnp.pi/4, 5*jnp.pi/4])
+        rho = 0.5
     elif manifold == "Landmarks":
         M = Landmarks(N=dim, m=2, k_alpha=0.1)
         z0 = jnp.vstack((jnp.linspace(-5.0,5.0,M.N),jnp.linspace(0.0,0.0,M.N))).T.flatten()
