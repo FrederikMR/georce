@@ -128,8 +128,6 @@ class SPDN(RiemannianManifold):
         v = self.Log(x,y)
         
         gamma = vmap(lambda t: self.Exp(x, v,t))(t_grid).reshape(-1, self.emb_dim)
-        gamma = vmap(lambda g: self.invf(g))(gamma)
-        
         
         gamma = gamma.reshape(-1, self.emb_dim)
         

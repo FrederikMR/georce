@@ -41,7 +41,7 @@ from geometry.geodesics.finsler import GEORCE as GEORCEF
 def parse_args():
     parser = argparse.ArgumentParser()
     # File-paths
-    parser.add_argument('--manifold', default="Sphere",
+    parser.add_argument('--manifold', default="H2",
                         type=str)
     parser.add_argument('--geometry', default="Riemannian",
                         type=str)
@@ -198,6 +198,7 @@ def riemannian_runtime()->None:
     init['std_time'] = None
     init['tol'] = args.tol
     init['max_iter'] = args.max_iter
+    init['error'] = None
     methods['init'] = init
     save_times(methods, save_path)
     ## JAX

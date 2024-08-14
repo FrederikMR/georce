@@ -95,19 +95,6 @@ class nEllipsoid(RiemannianManifold):
         
         return jnp.arccos(jnp.dot(x,y))
     
-    def Exp(self,
-            x:Array,
-            v:Array,
-            t:float=1.0,
-            )->Array:
-        
-        x /= self.params
-        v /= self.params
-        
-        norm = jnp.linalg.norm(v)
-        
-        return (jnp.cos(norm*t)*x+jnp.sin(norm*t)*v/norm)*self.params
-    
     def Log(self,
             x:Array,
             y:Array
