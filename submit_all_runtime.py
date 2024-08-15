@@ -51,7 +51,7 @@ def generate_job(manifold, d, T, method, geometry):
         --dim {d} \\
         --T {T} \\
         --v0 1.5 \\
-        --methhod {method} \\
+        --method {method} \\
         --jax_lr_rate 0.01 \\
         --tol 1e-4 \\
         --max_iter 1000 \\
