@@ -41,6 +41,10 @@ def generate_job(manifold, d, T, method, geometry):
     #BSUB -o sendmeemail/error_%J.out 
     #BSUB -e sendmeemail/output_%J.err 
     
+    module swap cuda/12.0
+    module swap cudnn/v8.9.1.23-prod-cuda-12.X
+    module swap python3/3.10.12
+    
     python3 runtime.py \\
         --manifold {manifold} \\
         --geometry {geometry} \\
@@ -80,17 +84,19 @@ def loop_jobs(wait_time = 1.0):
     
     for geo in geomtries:
         for T in Ts:
-            for man,d in runs.items():
-                time.sleep(wait_time+np.abs(np.random.normal(0.0,1.,1)[0]))
-                generate_job(man, d, T, geo)
-                try:
-                    submit_job()
-                except:
-                    time.sleep(10.0+np.abs(np.random.normal(0.0,1.,1)))
-                    try:
-                        submit_job()
-                    except:
-                        print(f"Job script with {geo}, {T}, {man}, {d} failed!")
+            for man,dims in runs.items():
+                for d in dims:
+                    for m in methods:
+                        time.sleep(wait_time+np.abs(np.random.normal(0.0,1.,1)[0]))
+                        generate_job(man, d, T, m, geo)
+                        try:
+                            submit_job()
+                        except:
+                            time.sleep(10.0+np.abs(np.random.normal(0.0,1.,1)))
+                            try:
+                                submit_job()
+                            except:
+                                print(f"Job script with {geo}, {T}, {man}, {m}, {d} failed!")
 
 #%% main
 
