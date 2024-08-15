@@ -1,6 +1,6 @@
 #!/bin/sh
 #BSUB -q gpuv100
-#BSUB -J RSPDN10_50
+#BSUB -J FEllipsoid100_50
 #BSUB -n 4
 #BSUB -gpu "num=1:mode=exclusive_process"
 #BSUB -W 24:00
@@ -18,9 +18,9 @@ module swap cudnn/v8.9.1.23-prod-cuda-12.X
 module swap python3/3.10.12
 
 python3 runtime.py \
-    --manifold SPDN \
-    --geometry Riemannian \
-    --dim 10 \
+    --manifold Ellipsoid \
+    --geometry Finsler \
+    --dim 100 \
     --T 50 \
     --v0 1.5 \
     --scipy_methods 1 \
