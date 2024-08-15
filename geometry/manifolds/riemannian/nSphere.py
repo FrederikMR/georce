@@ -32,6 +32,16 @@ class nSphere(nEllipsoid):
         
         return f"Sphere of dimension {self.dim} in {self.coordinates} coordinates equipped with the pull back metric"
     
+    def Exp(self,
+            x:Array,
+            v:Array,
+            t:float=1.0,
+            )->Array:
+        
+        norm = jnp.linalg.norm(v)
+        
+        return (jnp.cos(norm*t)*x+jnp.sin(norm*t)*v/norm)*self.params
+    
     def Geodesic(self,
                  x:Array,
                  y:Array,
