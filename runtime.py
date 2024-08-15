@@ -51,10 +51,8 @@ def parse_args():
                         type=int)
     parser.add_argument('--v0', default=1.5,
                         type=float)
-    parser.add_argument('--scipy_methods', default=1,
-                        type=int)
-    parser.add_argument('--jax_methods', default=1,
-                        type=int)
+    parser.add_argument('--method', default="GEORCE",
+                        type=str)
     parser.add_argument('--jax_lr_rate', default=0.01,
                         type=float)
     parser.add_argument('--tol', default=1e-4,
@@ -131,102 +129,128 @@ def riemannian_runtime()->None:
     
     args = parse_args()
     
-    jax_methods = {"ADAM": optimizers.adam, "SGD": optimizers.sgd}
-    scipy_methods = ["BFGS", 'CG', 'dogleg', 'trust-ncg', 'trust-exact']
-    
     save_path = ''.join((args.save_path, f'riemannian/{args.manifold}/'))
     if not os.path.exists(save_path):
         os.makedirs(save_path)
         
-    save_path = ''.join((save_path, args.manifold, '_d=', str(args.dim), '_T=', str(args.T), '.pkl'))
+    save_path = ''.join((save_path, args.method, 
+                         f'_{args.manifold}', 
+                         f'_d={args.dim}', 
+                         f'_T={args.T}.pkl',
+                         ))
     if os.path.exists(save_path):
         os.remove(save_path)
     
     z0, zT, M, rho = load_manifold(args.manifold, args.dim)
-    methods = {}
-    ## True Length
+    
     if hasattr(M, 'Geodesic'):
         #curve = M.Geodesic(z0,zT)
         #true_dist = M.length(curve)
         xt = M.Geodesic(z0,zT)
         zt = vmap(M.invf)(xt)
         length = M.length(zt)
-        true = {}
-        true['length'] = length
-        true['grad_norm'] = None
-        true['iterations'] = None
-        true['mu_time'] = None
-        true['std_time'] = None
-        true['tol'] = 0.0
-        true['max_iter'] = 0
-        true['error'] = 0.0
-        methods['ground_truth'] = true
         base_length = length
     else:
-        true = {}
-        true['length'] = None
-        true['grad_norm'] = None
-        true['iterations'] = None
-        true['mu_time'] = None
-        true['std_time'] = None
-        true['tol'] = None
-        true['max_iter'] = None
-        true['error'] = None
-        methods['ground_truth'] = true
         base_length = None
-    save_times(methods, save_path)
-    ## Geodesic Control
-    print("Computing GEORCE")
-    Geodesic = GEORCE(M=M,
-                      init_fun=None,
-                      T=args.T,
-                      tol=args.tol,
-                      max_iter=args.max_iter,
-                      line_search_method="soft",
-                      line_search_params={'rho':rho},
-                      )
-    methods['GEORCE'] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
-    save_times(methods, save_path)
-    ## Init Length
-    zt = Geodesic.init_fun(z0,zT,args.T)
-    init_length = M.length(zt)
-    init = {}
-    init['length'] = init_length
-    init['grad_norm'] = None
-    init['iterations'] = None
-    init['mu_time'] = None
-    init['std_time'] = None
-    init['tol'] = args.tol
-    init['max_iter'] = args.max_iter
-    init['error'] = None
-    methods['init'] = init
-    save_times(methods, save_path)
-    ## JAX
-    if args.jax_methods:
-        for opt in jax_methods:
-            print(f"Computing {opt}")
-            Geodesic = JAXOptimization(M = M,
-                                       init_fun=None,
-                                       lr_rate=args.jax_lr_rate,
-                                       optimizer=jax_methods[opt],
-                                       T=args.T,
-                                       max_iter=args.max_iter,
-                                       tol=args.tol
-                                       )
-            methods[opt] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
-            save_times(methods, save_path)
-    ## Scipy
-    if args.scipy_methods:
-        for m in scipy_methods:
-            print(f"Computing Scipy method {m}")
+    if args.method == "ground_truth":
+        methods = {}
+        if hasattr(M, 'Geodesic'):
+            #curve = M.Geodesic(z0,zT)
+            #true_dist = M.length(curve)
+            xt = M.Geodesic(z0,zT)
+            zt = vmap(M.invf)(xt)
+            length = M.length(zt)
+            true = {}
+            true['length'] = length
+            true['grad_norm'] = None
+            true['iterations'] = None
+            true['mu_time'] = None
+            true['std_time'] = None
+            true['tol'] = 0.0
+            true['max_iter'] = 0
+            true['error'] = 0.0
+            methods['ground_truth'] = true
+            base_length = length
+        else:
+            true = {}
+            true['length'] = None
+            true['grad_norm'] = None
+            true['iterations'] = None
+            true['mu_time'] = None
+            true['std_time'] = None
+            true['tol'] = None
+            true['max_iter'] = None
+            true['error'] = None
+            methods['ground_truth'] = true
+            base_length = None
+        save_times(methods, save_path)
+    elif args.method == "init":
+        Geodesic = GEORCE(M=M,
+                          init_fun=None,
+                          T=args.T,
+                          tol=args.tol,
+                          max_iter=args.max_iter,
+                          line_search_method="soft",
+                          line_search_params={'rho':rho},
+                          )
+        zt = Geodesic.init_fun(z0,zT,args.T)
+        init_length = M.length(zt)
+        init = {}
+        init['length'] = init_length
+        init['grad_norm'] = None
+        init['iterations'] = None
+        init['mu_time'] = None
+        init['std_time'] = None
+        init['tol'] = args.tol
+        init['max_iter'] = args.max_iter
+        init['error'] = None
+        methods['init'] = init
+        save_times(methods, save_path)
+    elif args.method == "GEORCE":
+        Geodesic = GEORCE(M=M,
+                          init_fun=None,
+                          T=args.T,
+                          tol=args.tol,
+                          max_iter=args.max_iter,
+                          line_search_method="soft",
+                          line_search_params={'rho':rho},
+                          )
+        methods['GEORCE'] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
+        save_times(methods, save_path)
+    elif args.method == "ADAM":
+        Geodesic = JAXOptimization(M = M,
+                                   init_fun=None,
+                                   lr_rate=args.jax_lr_rate,
+                                   optimizer=optimizers.adam,
+                                   T=args.T,
+                                   max_iter=args.max_iter,
+                                   tol=args.tol
+                                   )
+        methods["ADAM"] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
+        save_times(methods, save_path)
+    elif args.method == "SGD":
+        Geodesic = JAXOptimization(M = M,
+                                   init_fun=None,
+                                   lr_rate=args.jax_lr_rate,
+                                   optimizer=optimizers.sgd,
+                                   T=args.T,
+                                   max_iter=args.max_iter,
+                                   tol=args.tol
+                                   )
+        methods["SGD"] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
+        save_times(methods, save_path)
+    else:
+        try:
             Geodesic = ScipyOptimization(M = M,
                                          T=args.T,
                                          tol=args.tol,
                                          max_iter=args.max_iter,
-                                         method=m,
+                                         method=args.method,
                                          )
-            methods[m] = estimate_method(Geodesic, z0, zT, M, base_length)
+            methods[args.method] = estimate_method(Geodesic, z0, zT, M, base_length)
             save_times(methods, save_path)
+        except:
+            "Method is not defined"
     
     return
 
@@ -236,14 +260,15 @@ def finsler_runtime()->None:
     
     args = parse_args()
     
-    jax_methods = {"ADAM": optimizers.adam, "SGD": optimizers.sgd}
-    scipy_methods = ["BFGS", 'CG', 'dogleg', 'trust-ncg', 'trust-exact']
-    
     save_path = ''.join((args.save_path, f'finsler/{args.manifold}/'))
     if not os.path.exists(save_path):
         os.makedirs(save_path)
         
-    save_path = ''.join((save_path, args.manifold, '_d=', str(args.dim), '_T=', str(args.T), '.pkl'))
+    save_path = ''.join((save_path, args.method, 
+                         f'_{args.manifold}', 
+                         f'_d={args.dim}', 
+                         f'_T={args.T}.pkl',
+                         ))
     if os.path.exists(save_path):
         os.remove(save_path)
     
@@ -254,91 +279,114 @@ def finsler_runtime()->None:
                              v0=args.v0,
                              )
     
-    methods = {}
-    ## True Length
     if hasattr(M, 'Geodesic'):
         #curve = M.Geodesic(z0,zT)
         #true_dist = M.length(curve)
         xt = M.Geodesic(z0,zT)
         zt = vmap(M.invf)(xt)
         length = M.length(zt)
-        true = {}
-        true['length'] = length
-        true['grad_norm'] = None
-        true['iterations'] = None
-        true['mu_time'] = None
-        true['std_time'] = None
-        true['tol'] = 0.0
-        true['max_iter'] = 0
-        true['error'] = 0.0
-        methods['ground_truth'] = true
         base_length = length
     else:
-        true = {}
-        true['length'] = None
-        true['grad_norm'] = None
-        true['iterations'] = None
-        true['mu_time'] = None
-        true['std_time'] = None
-        true['tol'] = None
-        true['max_iter'] = None
-        true['error'] = None
-        methods['ground_truth'] = true
         base_length = None
-    save_times(methods, save_path)
-    ## Geodesic Control
-    print("Computing GEORCE")
-    Geodesic = GEORCEF(M=M,
-                       init_fun=None,
-                       T=args.T,
-                       tol=args.tol,
-                       max_iter=args.max_iter,
-                       line_search_method="soft",
-                       line_search_params={'rho':rho},
-                       )
-    methods['GEORCE'] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
-    save_times(methods, save_path)
-    ## Init Length
-    zt = Geodesic.init_fun(z0,zT,args.T)
-    init_length = M.length(zt)
-    init = {}
-    init['length'] = init_length
-    init['grad_norm'] = None
-    init['iterations'] = None
-    init['mu_time'] = None
-    init['std_time'] = None
-    init['tol'] = args.tol
-    init['max_iter'] = args.max_iter
-    methods['init'] = init
-    save_times(methods, save_path)
-    ## JAX
-    if args.jax_methods:
-        for opt in jax_methods:
-            print(f"Computing {opt}")
-            Geodesic = JAXFOptimization(M = M,
-                                        init_fun=None,
-                                        lr_rate=args.jax_lr_rate,
-                                        optimizer=jax_methods[opt],
-                                        T=args.T,
-                                        max_iter=args.max_iter,
-                                        tol=args.tol
-                                        )
-            methods[opt] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
-            save_times(methods, save_path)
-    ## Scipy
-    if args.scipy_methods:
-        for m in scipy_methods:
-            print(f"Computing Scipy method {m}")
+    if args.method == "ground_truth":
+        methods = {}
+        if hasattr(M, 'Geodesic'):
+            #curve = M.Geodesic(z0,zT)
+            #true_dist = M.length(curve)
+            xt = M.Geodesic(z0,zT)
+            zt = vmap(M.invf)(xt)
+            length = M.length(zt)
+            true = {}
+            true['length'] = length
+            true['grad_norm'] = None
+            true['iterations'] = None
+            true['mu_time'] = None
+            true['std_time'] = None
+            true['tol'] = 0.0
+            true['max_iter'] = 0
+            true['error'] = 0.0
+            methods['ground_truth'] = true
+            base_length = length
+        else:
+            true = {}
+            true['length'] = None
+            true['grad_norm'] = None
+            true['iterations'] = None
+            true['mu_time'] = None
+            true['std_time'] = None
+            true['tol'] = None
+            true['max_iter'] = None
+            true['error'] = None
+            methods['ground_truth'] = true
+            base_length = None
+        save_times(methods, save_path)
+    elif args.method == "init":
+        Geodesic = GEORCE(M=M,
+                          init_fun=None,
+                          T=args.T,
+                          tol=args.tol,
+                          max_iter=args.max_iter,
+                          line_search_method="soft",
+                          line_search_params={'rho':rho},
+                          )
+        zt = Geodesic.init_fun(z0,zT,args.T)
+        init_length = M.length(zt)
+        init = {}
+        init['length'] = init_length
+        init['grad_norm'] = None
+        init['iterations'] = None
+        init['mu_time'] = None
+        init['std_time'] = None
+        init['tol'] = args.tol
+        init['max_iter'] = args.max_iter
+        init['error'] = None
+        methods['init'] = init
+        save_times(methods, save_path)
+    elif args.method == "GEORCE":
+        Geodesic = GEORCEF(M=M,
+                           init_fun=None,
+                           T=args.T,
+                           tol=args.tol,
+                           max_iter=args.max_iter,
+                           line_search_method="soft",
+                           line_search_params={'rho':rho},
+                           )
+        methods['GEORCE'] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
+        save_times(methods, save_path)
+    elif args.method == "ADAM":
+        Geodesic = JAXFOptimization(M = M,
+                                    init_fun=None,
+                                    lr_rate=args.jax_lr_rate,
+                                    optimizer=optimizers.adam,
+                                    T=args.T,
+                                    max_iter=args.max_iter,
+                                    tol=args.tol
+                                    )
+        methods["ADAM"] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
+        save_times(methods, save_path)
+    elif args.method == "SGD":
+        Geodesic = JAXFOptimization(M = M,
+                                    init_fun=None,
+                                    lr_rate=args.jax_lr_rate,
+                                    optimizer=optimizers.sgd,
+                                    T=args.T,
+                                    max_iter=args.max_iter,
+                                    tol=args.tol
+                                    )
+        methods["SGD"] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
+        save_times(methods, save_path)
+    else:
+        try:
             Geodesic = ScipyFOptimization(M = M,
                                           T=args.T,
                                           tol=args.tol,
                                           max_iter=args.max_iter,
-                                          method=m,
+                                          method=args.method,
                                           )
-            methods[m] = estimate_method(Geodesic, z0, zT, M, base_length)
+            methods[args.method] = estimate_method(Geodesic, z0, zT, M, base_length)
             save_times(methods, save_path)
-    
-    return
+        except:
+            "Method is not defined"
 
 #%% main
 
