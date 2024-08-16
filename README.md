@@ -1,7 +1,7 @@
 # GEORCE
 Efficient computations of geodesic algorithms formulating optimization of the energy functional as a control problem.
 
-![Constructed geodesics using GEORCE and similar optimization algorithms](https://github.com/user-attachments/files/16638166/synthetic_finsler_geodesics.pdf)
+![Constructed geodesics using GEORCE and similar optimization algorithms](https://github.com/user-attachments/assets/b4264569-6fd1-4af3-918b-dad8cfe28b47)
 
 
 
@@ -20,6 +20,7 @@ The first line clones the repository, the second line moves you to the location 
 ## Code Structure
 
 The following shows the structure of the code. All general implementations of geometry and optimization algorithms can be found in the "geometry" folder for both the Riemannian and Finsler case.
+
     .
     ├── load_manifold.py                   # Load manifolds and points for connecting geodesic
     ├── runtime.py                         # Times length and runtime for different optimization algorithms to consturct geodesic
