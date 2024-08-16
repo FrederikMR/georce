@@ -3,8 +3,6 @@ Efficient computations of geodesic algorithms formulating optimization of the en
 
 ![Constructed geodesics using GEORCE and similar optimization algorithms](https://github.com/user-attachments/assets/b4264569-6fd1-4af3-918b-dad8cfe28b47)
 
-
-
 ## Installation and Requirements
 
 The implementations in the GitHub is Python using JAX. To clone the GitHub reporsitory and install packages type the following in the terminal
@@ -27,9 +25,10 @@ The following shows the structure of the code. All general implementations of ge
     ├── finsler_geodesic.ipynb             # Finsler geometry figures and plots
     ├── riemannian_geodesics.ipynb         # Riemannian geometry figures and plots
     ├── runtime_estimates.ipynb            # Runtime tables and figures
+    ├── georce.ipynb            # Runtime tables and figures
     ├── timing                             # Contains all timing results
-    ├── geometry                           # Contains implementation of Finsler and Riemannian geometries as well as geodesic optimization algorithms, inlcuding GEORCE
-    ├── LICENSE
+    ├── geometry                           # Contains implementation of Finsler and Riemannian manifolds as well as geodesic optimization algorithms, inlcuding GEORCE
+    ├── georce_example                     # An example of how to use GEORCE for Riemannian and Finsler manifolds
     └── README.md
 
 ## Reproducing Experiments
@@ -39,6 +38,10 @@ All experiments can be re-produced by running the notebooks and the runtime.py p
 ## Logging
 
 All experimental results for the runtime and length estimates are saved as .pkl files in the folder "timing".
+
+## How to use GEORCE to compute your geodesics
+
+If you want to clone this repository and use GEORCE to compute geodesics for your manifolds, then the folder "georce" contains implementations of GEORCE in JAX for Riemannian and Finsler manifolds, which takes any given metric as input. The notebook, georce_example.ipynb, illustrates how to compute geodesics using GEORCE.
 
 ## Reference
 
