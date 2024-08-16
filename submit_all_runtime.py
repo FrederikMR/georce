@@ -68,7 +68,7 @@ def generate_job(manifold, d, T, method, geometry):
 
 def loop_jobs(wait_time = 1.0):
     
-    geomtries = ['Finsler']
+    geomtries = ['Riemannian', 'Finsler']
     Ts = [50,100]    
     scipy_methods = ["BFGS", 'CG', 'dogleg', 'trust-ncg', 'trust-exact']
     jax_methods = ["ADAM", "SGD"]
