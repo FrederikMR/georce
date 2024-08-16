@@ -25,7 +25,7 @@ The following shows the structure of the code. All general implementations of ge
     ├── finsler_geodesic.ipynb             # Finsler geometry figures and plots
     ├── riemannian_geodesics.ipynb         # Riemannian geometry figures and plots
     ├── runtime_estimates.ipynb            # Runtime tables and figures
-    ├── georce.ipynb            # Runtime tables and figures
+    ├── georce.ipynb                       # Runtime tables and figures
     ├── timing                             # Contains all timing results
     ├── geometry                           # Contains implementation of Finsler and Riemannian manifolds as well as geodesic optimization algorithms, inlcuding GEORCE
     ├── georce_example                     # An example of how to use GEORCE for Riemannian and Finsler manifolds
