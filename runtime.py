@@ -279,6 +279,7 @@ def finsler_runtime()->None:
                              v0=args.v0,
                              )
     
+    methods = {}
     if hasattr(M, 'Geodesic'):
         #curve = M.Geodesic(z0,zT)
         #true_dist = M.length(curve)
@@ -289,7 +290,6 @@ def finsler_runtime()->None:
     else:
         base_length = None
     if args.method == "ground_truth":
-        methods = {}
         if hasattr(M, 'Geodesic'):
             #curve = M.Geodesic(z0,zT)
             #true_dist = M.length(curve)

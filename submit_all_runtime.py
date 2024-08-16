@@ -68,7 +68,7 @@ def generate_job(manifold, d, T, method, geometry):
 
 def loop_jobs(wait_time = 1.0):
     
-    geomtries = ['Riemannian', 'Finsler']
+    geomtries = ['Finsler']
     Ts = [50,100]    
     scipy_methods = ["BFGS", 'CG', 'dogleg', 'trust-ncg', 'trust-exact']
     jax_methods = ["ADAM", "SGD"]
@@ -92,7 +92,7 @@ def loop_jobs(wait_time = 1.0):
                         try:
                             submit_job()
                         except:
-                            time.sleep(10.0+np.abs(np.random.normal(0.0,1.,1)))
+                            time.sleep(100.0+np.abs(np.random.normal(0.0,1.,1)))
                             try:
                                 submit_job()
                             except:
