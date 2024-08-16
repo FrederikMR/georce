@@ -1,6 +1,6 @@
     #! /bin/bash
     #BSUB -q gpuv100
-    #BSUB -J SGD_RSphere2_50
+    #BSUB -J trust-exact_FH22_100
     #BSUB -n 4
     #BSUB -gpu "num=1:mode=exclusive_process"
     #BSUB -W 24:00
@@ -16,12 +16,12 @@
     module swap python3/3.10.12
     
     python3 runtime.py \
-        --manifold Sphere \
-        --geometry Riemannian \
+        --manifold H2 \
+        --geometry Finsler \
         --dim 2 \
-        --T 50 \
+        --T 100 \
         --v0 1.5 \
-        --methhod SGD \
+        --method trust-exact \
         --jax_lr_rate 0.01 \
         --tol 1e-4 \
         --max_iter 1000 \
