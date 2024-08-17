@@ -1,4 +1,4 @@
-# GEORCE
+# GEORCE: A Fast Optimization Algorithm For Geodesic Estimation
 Efficient computations of geodesic algorithms formulating optimization of the energy functional as a control problem.
 
 ![Constructed geodesics using GEORCE and similar optimization algorithms](https://github.com/user-attachments/assets/b4264569-6fd1-4af3-918b-dad8cfe28b47)
