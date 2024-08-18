@@ -1,10 +1,11 @@
     #! /bin/bash
-    #BSUB -q gpuv100
+    #BSUB -q hpc
     #BSUB -J trust-exact_FH22_100
     #BSUB -n 4
-    #BSUB -gpu "num=1:mode=exclusive_process"
     #BSUB -W 24:00
+    #BSUB -R "select[model == XeonE5_2660v3]"
     #BSUB -R "rusage[mem=10GB]"
+    #BSUB -R "span[hosts=1]"
     #BSUB -u fmry@dtu.dk
     #BSUB -B
     #BSUB -N
