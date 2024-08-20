@@ -327,6 +327,7 @@ class FisherRaoGeometry(RiemannianManifold):
     def G_frechet(self, z:Array)->Array:
         
         beta, lam = z[0], z[1]
+        gamma = 0.57721566490153286060651209008240243104215933593992 #Eulers constant
         
         return jnp.array([[(lam**2)/beta**2, (1.0-gamma)/beta],
                           [(1.0-gamma)/beta, ((gamma-1.0)**2+(jnp.pi**2)/6.0)/(lam**2)]
@@ -379,9 +380,126 @@ class FisherRaoGeometry(RiemannianManifold):
                                          jnp.kron(sigma_inv, sigma_inv),
                                          Dn
                                          )
+    
+    def pdf_exponential(self, x:Array, z:Array, *args)->Array:
+        
+        lam = z
+        
+        return lam*jnp.exp(-lam*x)
+    
+    def pdf_rayleigh(self, x:Array, z:Array, *args)->Array:
+        
+        sigma2 = z**2
+        
+        return jnp.exp(-(x**2)/(2*sigma2))*x/sigma2
+    
+    def pdf_erlang(self, x:Array, z:Array, *args)->Array:
+        
+        lam = z
+        k = args[0]
 
+        return (lam**k)*(x**(k-1))*jnp.exp(-lam*x)/jscipy.factorial(k-1)
 
-
+    def pdf_gaussian(self, x:Array, z:Array, *args)->Array:
+        
+        mu, sigma2 = z[0], z[1]**2
+        
+        return jnp.exp(-((x-mu)**2)/(2*sigma2))/jnp.sqrt(2*jnp.pi*sigma2)
+    
+    def pdf_laplace(self, x:Array, z:Array, *args)->Array:
+        
+        mu, sigma = z[0], z[1]
+        
+        return jnp.exp(-((x-mu)**2)/sigma)/(2*sigma)
+    
+    def pdf_generalised_gaussian(self, x:Array, z:Array, *args)->Array:
+        
+        mu, sigma = z[0], z[1]
+        beta = args[0]
+        
+        return beta*jnp.exp(-((x-mu)**beta)/sigma)/(2*sigma*jscipy.special.gamma(1.0/beta))
+    
+    def pdf_logistic(self, x:Array, z:Array, *args)->Array:
+        
+        mu, sigma = z[0], z[1]
+        
+        num = jnp.exp(-(x-mu)/sigma)
+        den = sigma*((jnp.exp(-(x-mu)/sigma)+1)**2)
+        
+        return num/den
+    
+    def pdf_cauchy(self, x:Array, z:Array, *args)->Array:
+        
+        mu, sigma = z[0], z[1]
+        
+        num = sigma
+        den = jnp.pi*(((x-mu)**2)+sigma**2)
+        
+        return num/den
+    
+    def pdf_students_t(self, x:Array, z:Array, *args)->Array:
+        
+        mu, sigma = z[0], z[1]
+        v = args[0]
+        
+        term1 = 1.0+(((x-mu)/sigma)**2)/v
+        term2 = jscipy.special.gamma((v+1)/2)/(sigma*jnp.sqrt(jnp.pi*v)*jscipy.special.gamma(v/2))
+        
+        return term2*(term1**(-(v+1)/2))
+    
+    def pdf_log_gaussian(self, x:Array, z:Array, *args)->Array:
+        
+        mu, sigma = z[0], z[1]
+        
+        return jnp.exp(-(jnp.log(x)-mu)/(2*sigma**2))/(sigma*x*jnp.sqrt(2*jnp.pi))
+    
+    def pdf_inverse_gaussian(self, x:Array, z:Array, *args)->Array:
+        
+        lam, mu = z[0], z[1]
+        
+        term1 = jnp.sqrt(lam/(2*jnp.pi*(x**3)))
+        term2 = jnp.exp(-lam*((x-mu)**2)/(2*(mu**2)*x))
+        
+        return term1*term2
+    
+    def pdf_gumbel(self, x:Array, z:Array, *args)->Array:
+        
+        mu, sigma = z[0], z[1]
+        
+        term1 = jnp.exp(-(x-mu)/sigma)/sigma
+        term2 = jnp.exp(-jnp.exp(-(x-mu)/sigma))
+        
+        return term1*term2
+    
+    def pdf_frechet(self, x:Array, z:Array, *args)->Array:
+        
+        beta, lam = z[0], z[1]
+        
+        return (lam/beta)*((x/beta)**(-lam-1))*jnp.exp(-((x/beta)**(-lam)))
+    
+    def pdf_weibull(self, x:Array, z:Array, *args)->Array:
+        
+        beta, lam = z[0], z[1]
+        
+        return (lam/beta)*((x/beta)**(lam-1))*jnp.exp(-((x/beta)**(lam)))
+    
+    def pdf_pareto(self, x:Array, z:Array, *args)->Array:
+        
+        theta, alpha = z[0], z[1]
+        
+        return theta*(alpha**theta)*(x**(-(theta+1)))
+    
+    def pdf_power_function(self, x:Array, z:Array, *args)->Array:
+        
+        theta, alpha = z[0], z[1]
+        
+        return theta*(alpha**(-theta))*(x**(theta-1))
+    
+    def pdf_power_function(self, x:Array, z:Array, *args)->Array:
+        
+        theta, alpha = z[0], z[1]
+        
+        return theta*(alpha**(-theta))*(x**(theta-1))
 
 
 
