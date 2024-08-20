@@ -1,11 +1,10 @@
     #! /bin/bash
-    #BSUB -q hpc
+    #BSUB -q gpuv100
     #BSUB -J trust-exact_FH22_100
     #BSUB -n 4
-    #BSUB -W 24:00
-    #BSUB -R "select[model == XeonE5_2660v3]"
+    #BSUB -gpu "num=1:mode=exclusive_process"
+    #BSUB -W 1:00
     #BSUB -R "rusage[mem=10GB]"
-    #BSUB -R "span[hosts=1]"
     #BSUB -u fmry@dtu.dk
     #BSUB -B
     #BSUB -N
@@ -30,5 +29,5 @@
         --number_repeats 5 \
         --timing_repeats 5 \
         --seed 2712 \
-        --save_path timing/
+        --save_path timing_gpu/
     
