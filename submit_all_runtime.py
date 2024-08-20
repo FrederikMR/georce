@@ -29,13 +29,12 @@ def generate_job(manifold, d, T, method, geometry):
     with open ('submit_runtime.sh', 'w') as rsh:
         rsh.write(f'''\
     #! /bin/bash
-    #BSUB -q hpc
+    #BSUB -q gpuv100
     #BSUB -J {method}_{geometry[0]}{manifold}{d}_{T}
     #BSUB -n 4
-    #BSUB -W 24:00
-    #BSUB -R "select[model == XeonE5_2660v3]"
+    #BSUB -gpu "num=1:mode=exclusive_process"
+    #BSUB -W 1:00
     #BSUB -R "rusage[mem=10GB]"
-    #BSUB -R "span[hosts=1]"
     #BSUB -u fmry@dtu.dk
     #BSUB -B
     #BSUB -N
@@ -60,7 +59,7 @@ def generate_job(manifold, d, T, method, geometry):
         --number_repeats 5 \\
         --timing_repeats 5 \\
         --seed 2712 \\
-        --save_path timing/
+        --save_path timing_gpu/
     ''')
     
     return

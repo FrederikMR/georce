@@ -21,3 +21,4 @@ from .nEllipsoid import nEllipsoid
 from .nEuclidean import nEuclidean
 from .T2 import T2
 from .VAEManifold import VAEManifold
+from .information_geometry import FisherRaoGeometry
