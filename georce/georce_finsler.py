@@ -135,8 +135,8 @@ class GEORCE_F(ABC):
         return (norm_grad>self.tol) & (idx < self.max_iter)
     
     def while_step(self,
-                     carry:Tuple[Array,Array,Array, Array, int],
-                     )->Array:
+                   carry:Tuple[Array,Array,Array, Array, int],
+                   )->Array:
         
         zt, ut, ht, gt, gt_inv, grad, idx = carry
         

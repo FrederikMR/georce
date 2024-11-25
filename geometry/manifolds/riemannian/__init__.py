@@ -20,5 +20,5 @@ from .nSphere import nSphere
 from .nEllipsoid import nEllipsoid
 from .nEuclidean import nEuclidean
 from .T2 import T2
-from .VAEManifold import VAEManifold
+from .latent_space_manifold import LatentSpaceManifold
 from .information_geometry import FisherRaoGeometry

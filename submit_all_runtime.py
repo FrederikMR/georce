@@ -75,8 +75,8 @@ def loop_jobs(wait_time = 1.0):
     methods = ['GEORCE', 'init', 'ground_truth']
     methods += jax_methods + scipy_methods
     #sphere
-    runs = {"Sphere": [2,3,5,10,20,50,100],
-            "Ellipsoid": [2,3,5,10,20,50,100],
+    runs = {"Sphere": [2,3,5,10,20,50,100, 250, 500, 1000, 5000, 10000],
+            "Ellipsoid": [2,3,5,10,20,50,100, 250, 500, 1000, 10000],
             "SPDN": [2,3],
             "T2": [2],
             "H2": [2],

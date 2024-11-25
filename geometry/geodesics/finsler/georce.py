@@ -150,7 +150,7 @@ class GEORCE(ABC):
         ut = tau*ut_hat+(1.-tau)*ut
         zt = self.z0+jnp.cumsum(ut[:-1], axis=0)
 
-        ht = self.ht(zt,ut[:-1])#jnp.einsum('tj,tjid,ti->td', un[1:], self.M.DG(xn[1:-1]), un[1:])
+        ht = self.ht(jnp.vstack((self.z0.reshape(1,-1), zt)), ut)
         gt = self.gt(zt,ut[1:])#jnp.einsum('tj,tjid,ti->td', un[1:], self.M.DG(xn[1:-1]), un[1:])
         gt_inv = jnp.vstack((self.M.Ginv(self.z0, ut[0]).reshape(-1,self.dim,self.dim), 
                              vmap(self.M.Ginv)(zt,ut[1:])))
@@ -165,7 +165,7 @@ class GEORCE(ABC):
         
         zt, ut = carry
         
-        ht = self.ht(zt,ut[:-1])#jnp.einsum('tj,tjid,ti->td', un[1:], self.M.DG(xn[1:-1]), un[1:])
+        ht = self.ht(jnp.vstack((self.z0.reshape(1,-1), zt)), ut)
         gt = self.gt(zt,ut[1:])#jnp.einsum('tj,tjid,ti->td', un[1:], self.M.DG(xn[1:-1]), un[1:])
         gt_inv = jnp.vstack((self.M.Ginv(self.z0, ut[0]).reshape(-1,self.dim,self.dim), 
                              vmap(self.M.Ginv)(zt,ut[1:])))
@@ -182,13 +182,13 @@ class GEORCE(ABC):
     
     def unconstrained_opt(self, ht:Array, gt:Array, gt_inv:Array)->Array:
         
-        g_cumsum = jnp.cumsum(gt[::-1], axis=0)[::-1]
+        g_cumsum = jnp.vstack((jnp.cumsum(gt[::-1], axis=0)[::-1], jnp.zeros((1,self.dim))))
         ginv_sum = jnp.sum(gt_inv, axis=0)
-        rhs = jnp.sum(jnp.einsum('tij,tj->ti', gt_inv[:-1], g_cumsum+ht), axis=0)+2.0*self.diff
+        rhs = jnp.sum(jnp.einsum('tij,tj->ti', gt_inv, g_cumsum+ht), axis=0)+2.0*self.diff
         #lhs = -jnp.linalg.inv(ginv_sum)
         #muT = jnp.einsum('ij,j->i', lhs, rhs)
         muT = -jnp.linalg.solve(ginv_sum, rhs)
-        mut = jnp.vstack((muT+g_cumsum+ht, muT))
+        mut = muT+g_cumsum+ht
         
         return mut
     
@@ -223,7 +223,7 @@ class GEORCE(ABC):
         
         if step == "while":
             gt = self.gt(zt,ut[1:])#jnp.einsum('tj,tjid,ti->td', un[1:], self.M.DG(xn[1:-1]), un[1:])
-            ht = self.ht(zt,ut[:-1])#jnp.einsum('tj,tjid,ti->td', un[1:], self.M.DG(xn[1:-1]), un[1:])
+            ht = self.ht(jnp.vstack((self.z0.reshape(1,-1), zt)), ut)
             gt_inv = jnp.vstack((self.M.Ginv(self.z0, ut[0]).reshape(-1,self.dim,self.dim), 
                                  vmap(self.M.Ginv)(zt,ut[1:])))
             grad = self.Denergy(zt)

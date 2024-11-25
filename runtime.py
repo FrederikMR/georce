@@ -80,6 +80,7 @@ def estimate_method(Geodesic, z0, zT, M, base_length=None):
     args = parse_args()
     
     method = {} 
+    print("Computing Estimates")
     zt, grad, grad_idx = Geodesic(z0,zT)
     print("\t-Estimate Computed")
     timing = []

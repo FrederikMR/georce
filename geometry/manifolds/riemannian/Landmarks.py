@@ -61,7 +61,7 @@ class Landmarks(RiemannianManifold):
     
     def __str__(self)->str:
         
-        return "Hyperbolic Paraboloid equipped with the pull back metric"
+        return "Landmarks space with LDDMM metric"
     
     def gsharp(self, z:Array):
         
