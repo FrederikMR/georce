@@ -41,11 +41,11 @@ from geometry.geodesics.finsler import GEORCE as GEORCEF
 def parse_args():
     parser = argparse.ArgumentParser()
     # File-paths
-    parser.add_argument('--manifold', default="H2",
+    parser.add_argument('--manifold', default="celeba",
                         type=str)
-    parser.add_argument('--geometry', default="Riemannian",
+    parser.add_argument('--geometry', default="Finsler",
                         type=str)
-    parser.add_argument('--dim', default=2,
+    parser.add_argument('--dim', default=32,
                         type=int)
     parser.add_argument('--T', default=100,
                         type=int)
