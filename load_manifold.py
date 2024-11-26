@@ -16,7 +16,7 @@ from jax import jit, lax
 import haiku as hk
 
 from geometry.manifolds.riemannian import nSphere, nEllipsoid, nEuclidean, \
-    nParaboloid, HyperbolicParaboloid, SPDN, H2, Cylinder, Landmarks, T2, LatentSpaceManifold
+    nParaboloid, HyperbolicParaboloid, SPDN, H2, Cylinder, Landmarks, T2, LatentSpaceManifold, FisherRaoGeometry
     
 from vae.model_loader import mnist_generator, svhn_generator, celeba_generator, load_model
 
@@ -88,6 +88,26 @@ def load_manifold(manifold:str="Euclidean",
         M = Landmarks(N=dim, m=2, k_alpha=0.1)
         z0 = jnp.vstack((jnp.linspace(-5.0,5.0,M.N),jnp.linspace(0.0,0.0,M.N))).T.flatten()
         zT = jnp.vstack((jnp.linspace(-1.0,1.0,M.N),jnp.linspace(0.0, 0.0, M.N))).T.flatten()
+        rho = 0.5
+    elif manifold == "Gaussian":
+        M = FisherRaoGeometry(distribution='Gaussian')
+        z0 = jnp.array([-1.0, 0.5])
+        zT = jnp.array([1.0, 1.0])
+        rho = .5
+    elif manifold == "Frechet":
+        M = FisherRaoGeometry(distribution='Frechet')
+        z0 = jnp.array([0.5, 0.5])
+        zT = jnp.array([1.0, 1.0])
+        rho = 0.5
+    elif manifold == "Cauchy":
+        M = FisherRaoGeometry(distribution='Cauchy')
+        z0 = jnp.array([-1.0, 0.5])
+        zT = jnp.array([1.0, 1.0])
+        rho = 0.5
+    elif manifold == "Pareto":
+        M = FisherRaoGeometry(distribution='Pareto')
+        z0 = jnp.array([0.5, 0.5])
+        zT = jnp.array([1.0, 1.0])
         rho = 0.5
     elif manifold == "celeba":
         celeba_state = load_model(''.join(('models/', f'celeba_{dim}/')))

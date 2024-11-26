@@ -24,7 +24,7 @@ def submit_job():
 
 #%% Generate jobs
 
-def generate_job(manifold, d, T, method, geometry):
+def generate_job(manifold, d, T, method, geometry, tol):
 
     with open ('submit_runtime.sh', 'w') as rsh:
         rsh.write(f'''\
@@ -53,13 +53,15 @@ def generate_job(manifold, d, T, method, geometry):
         --v0 1.5 \\
         --method {method} \\
         --jax_lr_rate 0.01 \\
-        --tol 1e-4 \\
+        --tol {tol} \\
         --max_iter 1000 \\
         --line_search_iter 100 \\
         --number_repeats 5 \\
         --timing_repeats 5 \\
         --seed 2712 \\
-        --save_path timing_gpu/
+        --save_path timing_gpu/ \\
+        --svhn_path /work3/fmry/Data/SVHN/ \\
+        --celeba_path /work3/fmry/Data/CelebA/
     ''')
     
     return
@@ -75,20 +77,28 @@ def loop_jobs(wait_time = 1.0):
     methods = ['GEORCE', 'init', 'ground_truth']
     methods += jax_methods + scipy_methods
     #sphere
-    runs = {"Sphere": [2,3,5,10,20,50,100, 250, 500, 1000, 5000, 10000],
-            "Ellipsoid": [2,3,5,10,20,50,100, 250, 500, 1000, 10000],
-            "SPDN": [2,3],
-            "T2": [2],
-            "H2": [2],
+    runs = {"Sphere": [[2,3,5,10,20,50,100, 250, 500, 1000],1e-4],
+            "Ellipsoid": [[2,3,5,10,20,50,100, 250, 500, 1000],1e-4],
+            "SPDN": [[2,3],1e-4],
+            "T2": [[2],1e-4],
+            "H2": [[2],1e-4],
+            "Gaussian": [[2],1e-4],
+            "Frechet": [[2],1e-4],
+            "Cauchy": [[2],1e-4],
+            "Pareto": [[2],1e-4],
+            "celeba": [[32],1e-3],
+            "svhn": [[32],1e-3],
+            "mnist": [[8],1e-3],
             }
     
     for geo in geomtries:
         for T in Ts:
-            for man,dims in runs.items():
+            for man, vals in runs.items():
+                dims, tol = vals[0], vals[1]
                 for d in dims:
                     for m in methods:
                         time.sleep(wait_time+np.abs(np.random.normal(0.0,1.,1)[0]))
-                        generate_job(man, d, T, m, geo)
+                        generate_job(man, d, T, m, geo, tol)
                         try:
                             submit_job()
                         except:
@@ -96,7 +106,7 @@ def loop_jobs(wait_time = 1.0):
                             try:
                                 submit_job()
                             except:
-                                print(f"Job script with {geo}, {T}, {man}, {m}, {d} failed!")
+                                print(f"Job script with {geo}, {T}, {man}, {m}, {d}, {tol} failed!")
 
 #%% main
 

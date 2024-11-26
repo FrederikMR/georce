@@ -69,6 +69,10 @@ def parse_args():
                         type=int)
     parser.add_argument('--save_path', default='timing/',
                         type=str)
+    parser.add_argument('--svhn_path', default="../../../Data/SVHN/",
+                        type=str)
+    parser.add_argument('--celeba_path', default="../../../Data/CelebA/",
+                        type=str)
 
     args = parser.parse_args()
     return args
@@ -142,7 +146,10 @@ def riemannian_runtime()->None:
     if os.path.exists(save_path):
         os.remove(save_path)
     
-    z0, zT, M, rho = load_manifold(args.manifold, args.dim)
+    z0, zT, M, rho = load_manifold(args.manifold, args.dim,
+                                   svhn_path=args.svhn_path,
+                                   celeba_path=args.celeba_path,
+                                   )
     
     methods = {}
     if hasattr(M, 'Geodesic'):

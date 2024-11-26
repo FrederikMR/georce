@@ -47,14 +47,14 @@ def generate_job(model:str, latent_dim:int,):
     
     python3 train_vae.py \\
         --model {model} \\
-        --svhn_dir "../../Data/SVHN/" \\
-        --celeba_dir "../../Data/CelebA/" \\
+        --svhn_dir /work3/fmry/Data/SVHN/ \\
+        --celeba_dir /work3/fmry/Data/CelebA/
         --lr_rate 0.0002 \\
         --con_training 0 \\
         --split 0.8 \\
         --batch_size 100 \\
         --latent_dim {latent_dim} \\
-        --epochs 50000 \\
+        --epochs 500000 \\
         --save_step 100 \\
         --save_path models/ \\
         --seed 2712
@@ -66,11 +66,13 @@ def generate_job(model:str, latent_dim:int,):
 
 def loop_jobs(wait_time = 1.0):
     
-    models = ['mnist', 'svhn', 'celeba']
-    latent_dim = [8, 16, 32, 64, 128, 256, 512]
+    models = {'mnist': [8], 
+              'svhn': [32], 
+              'celeba': [32],
+              }
     
-    for model in models:
-        for ldim in latent_dim:
+    for model,dims in models.items():
+        for ldim in dims:
             time.sleep(wait_time+np.abs(np.random.normal(0.0,1.,1)[0]))
             generate_job(model, ldim)
             try:
