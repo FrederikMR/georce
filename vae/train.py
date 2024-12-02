@@ -99,13 +99,11 @@ def train_VAE_model(model:object,
             state = TrainingState(initial_params, init_state, initial_opt_state, initial_rng_key)
         vae_apply_fn = lambda params, data, rng_key, state_val: model.apply(params, state_val, rng_key, data)[0]
 
-    print("hallo3")
     for step in range(epochs):
         state, loss = update(state, next(generator).x)
         if (step+1) % save_step == 0:
             save_model(save_path, state)
             print(f"Epoch: {step+1} \t ELBO: {loss[0]:.4f} \t RecLoss: {loss[1][0]:.4f} \t KLD: {loss[1][1]:.4f}")
-    print("Hallo4")
     save_model(save_path, state)
     
     return

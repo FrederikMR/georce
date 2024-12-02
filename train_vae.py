@@ -140,7 +140,6 @@ def train_vae()->None:
     if not (os.path.exists(save_path)):
         os.mkdir(save_path)
     
-    print("Hallo1")
     train_VAE_model(model=vae_model,
                         generator=ds_train,
                         lr_rate = args.lr_rate,
@@ -152,8 +151,6 @@ def train_vae()->None:
                         seed=args.seed,
                         criterion=None,
                         )
-    print("Hallo2")
-    
     
     return
 

@@ -49,7 +49,7 @@ def generate_job(model:str, latent_dim:int,):
     python3 train_vae.py \\
         --model {model} \\
         --svhn_dir /work3/fmry/Data/SVHN/ \\
-        --celeba_dir /work3/fmry/Data/CelebA/
+        --celeba_dir /work3/fmry/Data/CelebA/ \\
         --lr_rate 0.0002 \\
         --con_training 0 \\
         --split 0.8 \\
