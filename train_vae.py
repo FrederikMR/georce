@@ -49,7 +49,7 @@ from vae.models import celeba_vae
 def parse_args():
     parser = argparse.ArgumentParser()
     # File-paths
-    parser.add_argument('--model', default="celeba",
+    parser.add_argument('--model', default="mnist",
                         type=str)
     parser.add_argument('--svhn_dir', default="../../../Data/SVHN/",
                         type=str)
@@ -65,7 +65,7 @@ def parse_args():
                         type=int)
     parser.add_argument('--latent_dim', default=16,
                         type=int)
-    parser.add_argument('--epochs', default=50000,
+    parser.add_argument('--epochs', default=60000,
                         type=int)
     parser.add_argument('--save_step', default=100,
                         type=int)
@@ -139,7 +139,8 @@ def train_vae()->None:
     
     if not (os.path.exists(save_path)):
         os.mkdir(save_path)
-
+    
+    print("Hallo1")
     train_VAE_model(model=vae_model,
                         generator=ds_train,
                         lr_rate = args.lr_rate,
@@ -151,6 +152,7 @@ def train_vae()->None:
                         seed=args.seed,
                         criterion=None,
                         )
+    print("Hallo2")
     
     
     return

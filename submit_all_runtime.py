@@ -34,6 +34,7 @@ def generate_job(manifold, d, T, method, geometry, tol):
     #BSUB -n 4
     #BSUB -gpu "num=1:mode=exclusive_process"
     #BSUB -W 24:00
+    #BSUB -R "span[hosts=1]"
     #BSUB -R "rusage[mem=10GB]"
     #BSUB -u fmry@dtu.dk
     #BSUB -B
