@@ -63,9 +63,9 @@ def parse_args():
                         type=float)
     parser.add_argument('--batch_size', default=100,
                         type=int)
-    parser.add_argument('--latent_dim', default=16,
+    parser.add_argument('--latent_dim', default=8,
                         type=int)
-    parser.add_argument('--epochs', default=60000,
+    parser.add_argument('--epochs', default=50000,
                         type=int)
     parser.add_argument('--save_step', default=100,
                         type=int)
