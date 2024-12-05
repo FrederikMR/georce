@@ -55,8 +55,8 @@ def generate_job(model:str, latent_dim:int,):
         --split 0.8 \\
         --batch_size 100 \\
         --latent_dim {latent_dim} \\
-        --epochs 500000 \\
-        --save_step 10000 \\
+        --epochs 50000 \\
+        --save_step 1000 \\
         --save_path models/ \\
         --seed 2712
     ''')

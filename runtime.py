@@ -43,7 +43,7 @@ def parse_args():
     # File-paths
     parser.add_argument('--manifold', default="celeba",
                         type=str)
-    parser.add_argument('--geometry', default="Finsler",
+    parser.add_argument('--geometry', default="Riemannian",
                         type=str)
     parser.add_argument('--dim', default=32,
                         type=int)
