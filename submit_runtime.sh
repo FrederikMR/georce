@@ -1,9 +1,10 @@
     #! /bin/bash
     #BSUB -q gpuv100
-    #BSUB -J trust-exact_FH22_100
+    #BSUB -J GEORCE_FPareto2_100
     #BSUB -n 4
     #BSUB -gpu "num=1:mode=exclusive_process"
-    #BSUB -W 24:00
+    #BSUB -W 1:00
+    #BSUB -R "span[hosts=1]"
     #BSUB -R "rusage[mem=10GB]"
     #BSUB -u fmry@dtu.dk
     #BSUB -B
@@ -16,18 +17,20 @@
     module swap python3/3.10.12
     
     python3 runtime.py \
-        --manifold H2 \
+        --manifold Pareto \
         --geometry Finsler \
         --dim 2 \
         --T 100 \
         --v0 1.5 \
-        --method trust-exact \
+        --method GEORCE \
         --jax_lr_rate 0.01 \
-        --tol 1e-4 \
+        --tol 0.0001 \
         --max_iter 1000 \
         --line_search_iter 100 \
         --number_repeats 5 \
         --timing_repeats 5 \
         --seed 2712 \
-        --save_path timing_gpu/
+        --save_path timing_gpu/ \
+        --svhn_path /work3/fmry/Data/SVHN/ \
+        --celeba_path /work3/fmry/Data/CelebA/
     
