@@ -31,7 +31,10 @@ class RiemannianNavigation(FinslerManifold):
         self.v0 = v0
 
         self.dim = RM.dim
-        self.emb_dim = RM.emb_dim
+        if hasattr(RM, 'emb_dim'):
+            self.emb_dim = RM.emb_dim
+        else:
+            self.emb_dim = None
         super().__init__(F=self.metric, G=self.fundamental_tensor, f=self.RM.f, invf=self.RM.invf)
         
         return
