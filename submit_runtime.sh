@@ -1,6 +1,6 @@
     #! /bin/bash
     #BSUB -q gpuv100
-    #BSUB -J GEORCE_FPareto2_100
+    #BSUB -J init_Fmnist8_100
     #BSUB -n 4
     #BSUB -gpu "num=1:mode=exclusive_process"
     #BSUB -W 1:00
@@ -17,14 +17,14 @@
     module swap python3/3.10.12
     
     python3 runtime.py \
-        --manifold Pareto \
+        --manifold mnist \
         --geometry Finsler \
-        --dim 2 \
+        --dim 8 \
         --T 100 \
         --v0 1.5 \
-        --method GEORCE \
+        --method init \
         --jax_lr_rate 0.01 \
-        --tol 0.0001 \
+        --tol 0.001 \
         --max_iter 1000 \
         --line_search_iter 100 \
         --number_repeats 5 \
