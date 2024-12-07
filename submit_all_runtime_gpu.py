@@ -73,7 +73,7 @@ def loop_jobs(wait_time = 1.0):
     
     geomtries = ['Riemannian', 'Finsler']
     Ts = [50,100]
-    methods = ["ADAM", "SGD", "GEORCE"]
+    methods = ["ADAM", "SGD", "GEORCE", "init"]
     #sphere
     runs = {"Sphere": [[2,3,5,10,20,50,100, 250, 500, 1000],1e-4],
             "Ellipsoid": [[2,3,5,10,20,50,100, 250, 500, 1000],1e-4],
