@@ -3,7 +3,7 @@
     #BSUB -J init_Fmnist8_100
     #BSUB -n 4
     #BSUB -gpu "num=1:mode=exclusive_process"
-    #BSUB -W 1:00
+    #BSUB -W 24:00
     #BSUB -R "span[hosts=1]"
     #BSUB -R "rusage[mem=10GB]"
     #BSUB -u fmry@dtu.dk
