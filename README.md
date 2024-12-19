@@ -22,12 +22,15 @@ The following shows the structure of the code. All general implementations of ge
     .
     ├── load_manifold.py                   # Load manifolds and points for connecting geodesic
     ├── runtime.py                         # Times length and runtime for different optimization algorithms to consturct geodesic
+    ├── train_vae.py                       # Training of the VAE
     ├── finsler_geodesic.ipynb             # Finsler geometry figures and plots
     ├── riemannian_geodesics.ipynb         # Riemannian geometry figures and plots
+    ├── vae_geodesics.ipynb                # Geodesics for learned manifolds using vae
     ├── runtime_estimates.ipynb            # Runtime tables and figures
     ├── georce.ipynb                       # An example of how to use GEORCE for Riemannian and Finsler manifolds
     ├── timing_cpu                         # Contains all timing results for cpu
     ├── timing_gpu                         # Contains all timing results for gpu
+    ├── vae                                # Contains implementation of the VAE
     ├── geometry                           # Contains implementation of Finsler and Riemannian manifolds as well as geodesic optimization algorithms, inlcuding GEORCE
     ├── georce                             # A folder containing the GEORCE algorithm for Finsler and Riemannian manifolds that can be directly used in your application
     └── README.md
