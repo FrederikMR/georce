@@ -79,7 +79,7 @@ class FinslerManifold(ABC):
 
         integrand = vmap(lambda g,dg: self.F(g,dg)**2)(gamma[:-1], dgamma)
 
-        return jnp.trapz(integrand, dx=dt)
+        return jnp.trapezoid(integrand, dx=dt)
     
     def length(self,
                gamma:Array,
@@ -91,5 +91,5 @@ class FinslerManifold(ABC):
 
         integrand = vmap(lambda g,dg: self.F(g,dg))(gamma[:-1],dgamma)
             
-        return jnp.trapz(integrand, dx=dt)
+        return jnp.trapezoid(integrand, dx=dt)
     

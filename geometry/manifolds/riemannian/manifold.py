@@ -101,7 +101,7 @@ class RiemannianManifold(ABC):
         g = vmap(lambda g: self.G(g))(gamma)
         integrand = jnp.einsum('ti,tij,tj->t', dgamma, g[:-1], dgamma)
         
-        return jnp.trapz(integrand, dx=dt)
+        return jnp.trapezoid(integrand, dx=dt)
     
     def length(self,
                gamma:Array,
@@ -115,5 +115,5 @@ class RiemannianManifold(ABC):
         g = vmap(lambda g: self.G(g))(gamma)
         integrand = jnp.sqrt(jnp.einsum('ti,tij,tj->t', dgamma, g[:-1], dgamma))
             
-        return jnp.trapz(integrand, dx=dt)
+        return jnp.trapezoid(integrand, dx=dt)
     
