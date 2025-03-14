@@ -60,6 +60,7 @@ def parse_args():
 
 def paraboloid_cut_locus(z0, zT, eps, M):
 
+    @jit
     def compute_dist(e):
         
 
@@ -75,7 +76,7 @@ def paraboloid_cut_locus(z0, zT, eps, M):
     
         return zt, jit(M.length)(zt)
 
-    zt, dist = vmap(jit(compute_dist))(eps)
+    zt, dist = vmap(compute_dist)(eps)
     min_dist = jnp.argmin(dist)
     zt_geodesic = zt[min_dist]
 
@@ -86,7 +87,8 @@ def paraboloid_cut_locus(z0, zT, eps, M):
 #%% Torus
 
 def torus_cut_locus(z0, zT, M):
-
+    
+    @jit
     def compute_dist(zT):
     
         zt = Geodesic(z0,zT)[0]
@@ -107,7 +109,7 @@ def torus_cut_locus(z0, zT, M):
                      zT-2.*jnp.pi,
                     ))
 
-    zt, dist = vmap(jit(compute_dist))(zT)
+    zt, dist = vmap(compute_dist)(zT)
     dist_array = jnp.abs(dist-jnp.min(dist))
 
     return lax.cond(jnp.sum(dist_array < 1e-1) < 2, lambda *_: jnp.min(dist), lambda *_: -1.)
