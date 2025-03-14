@@ -169,6 +169,7 @@ def compute_cut_locus()->None:
         z1, z2 = paraboloid_grid_fun(args.n_grid)
         
         jit_fun = jit(paraboloid_cut_locus, static_argnums=3)
+        print(jit_fun(z0, jnp.zeros(2), eps, M))
         cl = vmap(vmap(lambda u,v: jit_fun(z0,jnp.stack((u,v)),eps,M)))(z1,z2)
         
         save_times({'cl': cl}, save_path) 
