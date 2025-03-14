@@ -50,7 +50,7 @@ def generate_job(manifold):
         --manifold {manifold} \\
         --n_grid 100 \\
         --runs 10 \\
-        --śeed 2712 \\
+        --seed 2712 \\
         --save_path cut_locus/ \\
     ''')
     
