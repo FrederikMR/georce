@@ -158,7 +158,7 @@ def compute_cut_locus()->None:
         
     from jax.lib import xla_bridge
     print(xla_bridge.get_backend().platform)
-        
+    return    
     if args.manifold == "Paraboloid":
         z0 = jnp.ones(2, dtype=jnp.float32)
         _, _, M, _ = load_manifold("Paraboloid", dim=2)
