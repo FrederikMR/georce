@@ -46,7 +46,7 @@ def generate_job(manifold):
     module swap cudnn/v8.9.1.23-prod-cuda-12.X
     module swap python3/3.10.12
     
-    python3 runtime.py \\
+    python3 cut_locus.py \\
         --manifold {manifold} \\
         --n_grid 100 \\
         --runs 10 \\
