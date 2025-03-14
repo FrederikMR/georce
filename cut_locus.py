@@ -158,7 +158,7 @@ def compute_cut_locus()->None:
         
     if args.manifold == "Paraboloid":
         z0 = jnp.ones(2, dtype=jnp.float32)
-        _, _, M, _ = load_manifold("paraboloid", dim=2)
+        _, _, M, _ = load_manifold("Paraboloid", dim=2)
         
         key = jrandom.key(args.seed)
         key, subkey = jrandom.split(key)
