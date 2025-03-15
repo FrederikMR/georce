@@ -95,7 +95,7 @@ def torus_cut_locus(z0, zT, M):
     
         zt = Geodesic(z0,zT)[0]
     
-        return zt, dist_fun(zt), zt[1]-zt[0]
+        return zt, jit(M.length)(zt), zt[1]-zt[0]
 
     Geodesic = jit(GEORCE(M=M,
                           init_fun=None,
@@ -104,7 +104,6 @@ def torus_cut_locus(z0, zT, M):
                           max_iter=1000,
                           line_search_params={'rho': 0.5},
                           ))
-    dist_fun = jit(M.length)
     zT = jnp.vstack((zT,
                      jnp.array([zT[0]-2.*jnp.pi, zT[1]]),
                      jnp.array([zT[0], zT[1]-2.*jnp.pi]),
