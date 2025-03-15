@@ -170,14 +170,12 @@ def compute_cut_locus()->None:
         
         z1, z2 = paraboloid_grid_fun(args.n_grid)
         
-        jit_fun = jit(paraboloid_cut_locus, static_argnums=3)
-        
         cl_lst = []
         zt_lst = []
         u0_lst = []
         for i in range(1, 2+args.n_grid//100):
-            val = vmap(vmap(lambda u,v: jit_fun(z0,jnp.stack((u,v)),eps,M)))(z1[((i-1)*100):(i*100)],
-                                                                             z2[((i-1)*100):(i*100)])
+            val = vmap(vmap(lambda u,v: paraboloid_cut_locus(z0,jnp.stack((u,v)),eps,M)))(z1[((i-1)*100):(i*100)],
+                                                                                          z2[((i-1)*100):(i*100)])
             cl_lst.append(val[0])
             zt_lst.append(val[1])
             u0_lst.append(val[2])
@@ -194,14 +192,12 @@ def compute_cut_locus()->None:
         
         z1, z2 = torus_grid_fun(args.n_grid)
         
-        jit_fun = jit(torus_cut_locus, static_argnums=2)
-        
         cl_lst = []
         zt_lst = []
         u0_lst = []
         for i in range(1, 2+args.n_grid//100):
-            val = vmap(vmap(lambda u,v: jit_fun(z0,jnp.stack((u,v)),M)))(z1[((i-1)*100):(i*100)],
-                                                                         z2[((i-1)*100):(i*100)])
+            val = vmap(vmap(lambda u,v: torus_cut_locus(z0,jnp.stack((u,v)),M)))(z1[((i-1)*100):(i*100)],
+                                                                                 z2[((i-1)*100):(i*100)])
             cl_lst.append(val[0])
             zt_lst.append(val[1])
             u0_lst.append(val[2])
