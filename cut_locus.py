@@ -27,6 +27,8 @@ import argparse
 
 from typing import Dict
 
+from functools import partial
+
 #JAX Optimization
 from jax.example_libraries import optimizers
 
@@ -58,23 +60,22 @@ def parse_args():
 
 #%% Paraboloid
 
+@partial(jit, static_argnames=['M'])
 def paraboloid_cut_locus(z0, zT, eps, M):
 
-    @jit
     def compute_dist(e):
-        
 
-        Geodesic = jit(GEORCE(M=M,
-                              init_fun=lambda x,y,T: e*(zT-z0)+z0,
-                              T=100,
-                              line_search_method="soft",
-                              max_iter=1000,
-                              line_search_params={'rho': 0.5},
-                             ))
+        Geodesic = GEORCE(M=M,
+                          init_fun=lambda x,y,T: e*(zT-z0)+z0,
+                          T=100,
+                          line_search_method="soft",
+                          max_iter=1000,
+                          line_search_params={'rho': 0.5},
+                          )
     
         zt = Geodesic(z0,zT)[0]
     
-        return zt, jit(M.length)(zt), zt[1]-zt[0]
+        return zt, M.length(zt), zt[1]-zt[0]
 
     zt, dist, u0 = vmap(compute_dist)(eps)
     min_dist = jnp.argmin(dist)
@@ -88,22 +89,22 @@ def paraboloid_cut_locus(z0, zT, eps, M):
 
 #%% Torus
 
+@partial(jit, static_argnames=['M'])
 def torus_cut_locus(z0, zT, M):
     
-    @jit
     def compute_dist(zT):
     
         zt = Geodesic(z0,zT)[0]
     
-        return zt, jit(M.length)(zt), zt[1]-zt[0]
+        return zt, M.length(zt), zt[1]-zt[0]
 
-    Geodesic = jit(GEORCE(M=M,
-                          init_fun=None,
-                          T=100,
-                          line_search_method="soft",
-                          max_iter=1000,
-                          line_search_params={'rho': 0.5},
-                          ))
+    Geodesic = GEORCE(M=M,
+                      init_fun=None,
+                      T=100,
+                      line_search_method="soft",
+                      max_iter=1000,
+                      line_search_params={'rho': 0.5},
+                      )
     zT = jnp.vstack((zT,
                      jnp.array([zT[0]-2.*jnp.pi, zT[1]]),
                      jnp.array([zT[0], zT[1]-2.*jnp.pi]),
