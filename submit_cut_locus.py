@@ -48,7 +48,7 @@ def generate_job(manifold):
     
     python3 cut_locus.py \\
         --manifold {manifold} \\
-        --n_grid 100 \\
+        --n_grid 1000 \\
         --runs 10 \\
         --seed 2712 \\
         --save_path cut_locus/ \\

@@ -42,7 +42,7 @@ from geometry.geodesics.finsler import GEORCE as GEORCEF
 def parse_args():
     parser = argparse.ArgumentParser()
     # File-paths
-    parser.add_argument('--manifold', default="T2",
+    parser.add_argument('--manifold', default="Paraboloid",
                         type=str)
     parser.add_argument('--n_grid', default=100,
                         type=int)
@@ -74,9 +74,8 @@ def paraboloid_cut_locus(z0, zT, eps, M):
     
         zt = Geodesic(z0,zT)[0]
     
-        return zt, dist_fun(zt), zt[1]-zt[0]
+        return zt, jit(M.length)(zt), zt[1]-zt[0]
 
-    dist_fun = jit(M.length)
     zt, dist, u0 = vmap(compute_dist)(eps)
     min_dist = jnp.argmin(dist)
     zt_geodesic = zt[min_dist]
@@ -183,9 +182,9 @@ def compute_cut_locus()->None:
             zt_lst.append(val[1])
             u0_lst.append(val[2])
             
-        cl = jnp.stack(cl_lst)
-        zt = jnp.stack(zt_lst)
-        u0 = jnp.stack(u0_lst)
+        cl = jnp.concatenate(cl_lst, axis=0)
+        zt = jnp.concatenate(zt_lst, axis=0)
+        u0 = jnp.concatenate(u0_lst, axis=0)
         
         save_times({'cl': cl, 'zt': zt, 'u0': u0}, save_path) 
     elif args.manifold == "T2":
@@ -207,9 +206,9 @@ def compute_cut_locus()->None:
             zt_lst.append(val[1])
             u0_lst.append(val[2])
         
-        cl = jnp.stack(cl_lst)
-        zt = jnp.stack(zt_lst)
-        u0 = jnp.stack(u0_lst)
+        cl = jnp.concatenate(cl_lst, axis=0)
+        zt = jnp.concatenate(zt_lst, axis=0)
+        u0 = jnp.concatenate(u0_lst, axis=0)
         
         save_times({'cl': cl, 'zt': zt, 'u0': u0}, save_path)
     else:
