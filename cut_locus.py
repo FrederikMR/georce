@@ -155,8 +155,6 @@ def compute_cut_locus()->None:
     save_path = ''.join((save_path,
                          f'{args.manifold}.pkl',
                          ))
-    if os.path.exists(save_path):
-        os.remove(save_path)
 
     if args.manifold == "Paraboloid":
         z0 = jnp.ones(2, dtype=jnp.float32)
