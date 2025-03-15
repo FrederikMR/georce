@@ -44,7 +44,7 @@ def parse_args():
     # File-paths
     parser.add_argument('--manifold', default="T2",
                         type=str)
-    parser.add_argument('--n_grid', default=10,
+    parser.add_argument('--n_grid', default=100,
                         type=int)
     parser.add_argument('--runs', default=2,
                         type=int)
@@ -74,15 +74,18 @@ def paraboloid_cut_locus(z0, zT, eps, M):
     
         zt = Geodesic(z0,zT)[0]
     
-        return zt, jit(M.length)(zt)
+        return zt, dist_fun(zt), zt[1]-zt[0]
 
-    zt, dist = vmap(compute_dist)(eps)
+    dist_fun = jit(M.length)
+    zt, dist, u0 = vmap(compute_dist)(eps)
     min_dist = jnp.argmin(dist)
     zt_geodesic = zt[min_dist]
 
     error = jnp.mean(jnp.linalg.norm(zt-zt_geodesic, axis=0))
+    
+    cl_dist = lax.cond(error < 1e-1, lambda *_: jnp.min(dist), lambda *_: -1.)
 
-    return lax.cond(error < 1e-1, lambda *_: jnp.min(dist), lambda *_: -1.)
+    return cl_dist, zt, u0
 
 #%% Torus
 
@@ -93,7 +96,7 @@ def torus_cut_locus(z0, zT, M):
     
         zt = Geodesic(z0,zT)[0]
     
-        return zt, dist_fun(zt)
+        return zt, dist_fun(zt), zt[1]-zt[0]
 
     Geodesic = jit(GEORCE(M=M,
                           init_fun=None,
@@ -109,10 +112,12 @@ def torus_cut_locus(z0, zT, M):
                      zT-2.*jnp.pi,
                     ))
 
-    zt, dist = vmap(compute_dist)(zT)
+    zt, dist, u0 = vmap(compute_dist)(zT)
     dist_array = jnp.abs(dist-jnp.min(dist))
-
-    return lax.cond(jnp.sum(dist_array < 1e-1) < 2, lambda *_: jnp.min(dist), lambda *_: -1.)
+    
+    cl_dist = lax.cond(jnp.sum(dist_array < 1e-1) < 2, lambda *_: jnp.min(dist), lambda *_: -1.)
+    
+    return cl_dist, zt, u0
 
 #%% Grid Computers
 
@@ -167,10 +172,22 @@ def compute_cut_locus()->None:
         z1, z2 = paraboloid_grid_fun(args.n_grid)
         
         jit_fun = jit(paraboloid_cut_locus, static_argnums=3)
-        print(jit_fun(z0, jnp.zeros(2), eps, M))
-        cl = vmap(vmap(lambda u,v: jit_fun(z0,jnp.stack((u,v)),eps,M)))(z1,z2)
         
-        save_times({'cl': cl}, save_path) 
+        cl_lst = []
+        zt_lst = []
+        u0_lst = []
+        for i in range(1, 2+args.n_grid//100):
+            val = vmap(vmap(lambda u,v: jit_fun(z0,jnp.stack((u,v)),eps,M)))(z1[((i-1)*100):(i*100)],
+                                                                             z2[((i-1)*100):(i*100)])
+            cl_lst.append(val[0])
+            zt_lst.append(val[1])
+            u0_lst.append(val[2])
+            
+        cl = jnp.stack(cl_lst)
+        zt = jnp.stack(zt_lst)
+        u0 = jnp.stack(u0_lst)
+        
+        save_times({'cl': cl, 'zt': zt, 'u0': u0}, save_path) 
     elif args.manifold == "T2":
         
         z0 = jnp.zeros(2, dtype=jnp.float32)
@@ -179,9 +196,22 @@ def compute_cut_locus()->None:
         z1, z2 = torus_grid_fun(args.n_grid)
         
         jit_fun = jit(torus_cut_locus, static_argnums=2)
-        cl = vmap(vmap(lambda u,v: jit_fun(z0,jnp.stack((u,v)),M)))(z1,z2)
         
-        save_times({'cl': cl}, save_path) 
+        cl_lst = []
+        zt_lst = []
+        u0_lst = []
+        for i in range(1, 2+args.n_grid//100):
+            val = vmap(vmap(lambda u,v: jit_fun(z0,jnp.stack((u,v)),M)))(z1[((i-1)*100):(i*100)],
+                                                                         z2[((i-1)*100):(i*100)])
+            cl_lst.append(val[0])
+            zt_lst.append(val[1])
+            u0_lst.append(val[2])
+        
+        cl = jnp.stack(cl_lst)
+        zt = jnp.stack(zt_lst)
+        u0 = jnp.stack(u0_lst)
+        
+        save_times({'cl': cl, 'zt': zt, 'u0': u0}, save_path)
     else:
         raise ValueError(f"{args.manifold} is invalid manifold.")
 
