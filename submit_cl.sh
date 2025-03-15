@@ -18,7 +18,7 @@
     
     python3 cut_locus.py \
         --manifold T2 \
-        --n_grid 100 \
+        --n_grid 200 \
         --runs 10 \
         --seed 2712 \
         --save_path cut_locus/ \
