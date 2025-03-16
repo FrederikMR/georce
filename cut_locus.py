@@ -170,19 +170,7 @@ def compute_cut_locus()->None:
         
         z1, z2 = paraboloid_grid_fun(args.n_grid)
         
-        cl_lst = []
-        zt_lst = []
-        u0_lst = []
-        for i in range(1, 2+args.n_grid//100):
-            val = vmap(vmap(lambda u,v: paraboloid_cut_locus(z0,jnp.stack((u,v)),eps,M)))(z1[((i-1)*100):(i*100)],
-                                                                                          z2[((i-1)*100):(i*100)])
-            cl_lst.append(val[0])
-            zt_lst.append(val[1])
-            u0_lst.append(val[2])
-            
-        cl = jnp.concatenate(cl_lst, axis=0)
-        zt = jnp.concatenate(zt_lst, axis=0)
-        u0 = jnp.concatenate(u0_lst, axis=0)
+        cl, zt, u0 = vmap(vmap(lambda u,v: paraboloid_cut_locus(z0,jnp.stack((u,v)),eps,M)))(z1,z2)
         
         save_times({'cl': cl, 'zt': zt, 'u0': u0}, save_path) 
     elif args.manifold == "T2":
@@ -192,19 +180,7 @@ def compute_cut_locus()->None:
         
         z1, z2 = torus_grid_fun(args.n_grid)
         
-        cl_lst = []
-        zt_lst = []
-        u0_lst = []
-        for i in range(1, 2+args.n_grid//100):
-            val = vmap(vmap(lambda u,v: torus_cut_locus(z0,jnp.stack((u,v)),M)))(z1[((i-1)*100):(i*100)],
-                                                                                 z2[((i-1)*100):(i*100)])
-            cl_lst.append(val[0])
-            zt_lst.append(val[1])
-            u0_lst.append(val[2])
-        
-        cl = jnp.concatenate(cl_lst, axis=0)
-        zt = jnp.concatenate(zt_lst, axis=0)
-        u0 = jnp.concatenate(u0_lst, axis=0)
+        cl, zt, u0 = vmap(vmap(lambda u,v: torus_cut_locus(z0,jnp.stack((u,v)),M)))(z1,z2)
         
         save_times({'cl': cl, 'zt': zt, 'u0': u0}, save_path)
     else:
