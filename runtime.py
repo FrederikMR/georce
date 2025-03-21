@@ -36,22 +36,24 @@ from geometry.geodesics.finsler import JAXOptimization as JAXFOptimization
 from geometry.geodesics.finsler import ScipyOptimization as ScipyFOptimization
 from geometry.geodesics.finsler import GEORCE as GEORCEF
 
+from geometry.geodesics.riemannian import ScipyBVP
+
 #%% Args Parser
 
 def parse_args():
     parser = argparse.ArgumentParser()
     # File-paths
-    parser.add_argument('--manifold', default="celeba",
+    parser.add_argument('--manifold', default="Sphere",
                         type=str)
     parser.add_argument('--geometry', default="Riemannian",
                         type=str)
-    parser.add_argument('--dim', default=32,
+    parser.add_argument('--dim', default=2,
                         type=int)
     parser.add_argument('--T', default=100,
                         type=int)
     parser.add_argument('--v0', default=1.5,
                         type=float)
-    parser.add_argument('--method', default="GEORCE",
+    parser.add_argument('--method', default="BVP_RK45",
                         type=str)
     parser.add_argument('--jax_lr_rate', default=0.01,
                         type=float)
@@ -61,13 +63,13 @@ def parse_args():
                         type=int)
     parser.add_argument('--line_search_iter', default=100,
                         type=int)
-    parser.add_argument('--number_repeats', default=5,
+    parser.add_argument('--number_repeats', default=1,
                         type=int)
-    parser.add_argument('--timing_repeats', default=5,
+    parser.add_argument('--timing_repeats', default=1,
                         type=int)
     parser.add_argument('--seed', default=2712,
                         type=int)
-    parser.add_argument('--save_path', default='timing/',
+    parser.add_argument('--save_path', default='timing_local/',
                         type=str)
     parser.add_argument('--svhn_path', default="../../../Data/SVHN/",
                         type=str)
@@ -235,6 +237,17 @@ def riemannian_runtime()->None:
                                    tol=args.tol
                                    )
         methods["ADAM"] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
+        save_times(methods, save_path)
+    elif "BVP" in args.method:
+        method_type = args.method.replace('BVP_', '')
+        Geodesic = ScipyBVP(M = M,
+                            T=args.T,
+                            tol=args.tol,
+                            max_iter=args.max_iter,
+                            method=method_type,
+                            )
+        methods[method_type] = estimate_method(Geodesic, z0, zT, M, base_length)
+        print(methods)
         save_times(methods, save_path)
     elif args.method == "SGD":
         Geodesic = JAXOptimization(M = M,

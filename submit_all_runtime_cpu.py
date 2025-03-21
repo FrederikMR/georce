@@ -89,6 +89,11 @@ def loop_jobs(wait_time = 1.0):
             "mnist": [[8],1e-3],
             }
     
+    geomtries = ['Riemannian']
+    Ts = [100]
+    methods = ['BVP_RK45', 'BVP_RK23', 'BVP_DOP853', 'BVP_Radau', 'BVP_BDF', 'BVP_LSODA']
+    runs = {"Sphere": [[2,3,5,10,20,50,100, 250, 500, 1000],1e-4]}
+
     for geo in geomtries:
         for T in Ts:
             for man, vals in runs.items():

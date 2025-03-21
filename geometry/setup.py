@@ -25,3 +25,6 @@ from scipy.optimize import minimize
 
 from abc import ABC
 from typing import Callable, Tuple, Dict 
+
+#scipy solve bvp
+from scipy.integrate import solve_ivp

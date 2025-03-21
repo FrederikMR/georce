@@ -83,7 +83,7 @@ class RiemannianManifold(ABC):
                           v:Array
                           )->Array:
         
-        Gamma = self.Chris(z)
+        Gamma = self.christoffel_symbols(z)
 
         dx1t = v
         dx2t = -jnp.einsum('ikl,k,l->i',Gamma,v,v)
