@@ -89,6 +89,8 @@ def loop_jobs(wait_time = 1.0):
             "mnist": [[8],1e-3],
             }
     
+    methods = ['SparseNewton', 'SparseRegNewton']
+    
     for geo in geomtries:
         for T in Ts:
             for man, vals in runs.items():
