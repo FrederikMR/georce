@@ -12,3 +12,4 @@ from .gradient_descent import GradientDescent
 from .jax_optimization import JAXOptimization
 from .georce import GEORCE
 from .scipy_optimization import ScipyOptimization
+from .newton_method import SparseNewton, SparseRegNewton

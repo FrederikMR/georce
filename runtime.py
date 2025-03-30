@@ -35,6 +35,8 @@ from geometry.geodesics.riemannian import JAXOptimization, ScipyOptimization, GE
 from geometry.geodesics.finsler import JAXOptimization as JAXFOptimization
 from geometry.geodesics.finsler import ScipyOptimization as ScipyFOptimization
 from geometry.geodesics.finsler import GEORCE as GEORCEF
+from geometry.geodesics.finsler import SparseNewton as SparseNewtonF
+from geometry.geodesics.finsler import SparseRegNewton as SparseRegNewtonF
 
 from geometry.geodesics.riemannian import ScipyBVP
 
@@ -45,7 +47,7 @@ def parse_args():
     # File-paths
     parser.add_argument('--manifold', default="Sphere",
                         type=str)
-    parser.add_argument('--geometry', default="Riemannian",
+    parser.add_argument('--geometry', default="Finsler",
                         type=str)
     parser.add_argument('--dim', default=2,
                         type=int)
@@ -397,6 +399,30 @@ def finsler_runtime()->None:
                            line_search_params={'rho':rho},
                            )
         methods['GEORCE'] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
+        save_times(methods, save_path)
+    elif args.method == "SparseNewton":
+        Geodesic = SparseNewtonF(M=M,
+                                 init_fun=None,
+                                 T = args.T,
+                                 max_iter = args.max_iter,
+                                 tol = args.tol,
+                                 line_search_method="soft",
+                                 line_search_params={'rho': 0.5},
+                                 )
+        methods['SparseNewton'] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
+        save_times(methods, save_path)
+    elif args.method == "SparseRegNewton":
+        Geodesic = SparseRegNewtonF(M=M,
+                                    init_fun=None,
+                                    T = args.T,
+                                    max_iter = args.max_iter,
+                                    tol = args.tol,
+                                    lam = 1.0,
+                                    kappa = 0.5,
+                                    line_search_method="soft",
+                                    line_search_params={'rho': 0.5},
+                                    )
+        methods['SparseRegNewton'] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
         save_times(methods, save_path)
     elif args.method == "ADAM":
         Geodesic = JAXFOptimization(M = M,
