@@ -31,7 +31,7 @@ from jax.example_libraries import optimizers
 
 from load_manifold import load_manifold
 from geometry.manifolds.finsler import RiemannianNavigation
-from geometry.geodesics.riemannian import JAXOptimization, ScipyOptimization, GEORCE
+from geometry.geodesics.riemannian import JAXOptimization, ScipyOptimization, GEORCE, SparseNewton, SparseRegNewton
 from geometry.geodesics.finsler import JAXOptimization as JAXFOptimization
 from geometry.geodesics.finsler import ScipyOptimization as ScipyFOptimization
 from geometry.geodesics.finsler import GEORCE as GEORCEF
@@ -53,7 +53,7 @@ def parse_args():
                         type=int)
     parser.add_argument('--v0', default=1.5,
                         type=float)
-    parser.add_argument('--method', default="BVP_RK45",
+    parser.add_argument('--method', default="SparseRegNewton",
                         type=str)
     parser.add_argument('--jax_lr_rate', default=0.01,
                         type=float)
@@ -227,6 +227,31 @@ def riemannian_runtime()->None:
                           )
         methods['GEORCE'] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
         save_times(methods, save_path)
+    elif args.method == "SparseNewton":
+        Geodesic = SparseNewton(M=M,
+                                init_fun=None,
+                                T = args.T,
+                                max_iter = args.max_iter,
+                                tol = args.tol,
+                                line_search_method="soft",
+                                line_search_params={'rho': 0.5},
+                                )
+        methods['SparseNewton'] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
+        save_times(methods, save_path)
+        
+    elif args.method == "SparseRegNewton":
+        Geodesic = SparseRegNewton(M=M,
+                                init_fun=None,
+                                T = args.T,
+                                max_iter = args.max_iter,
+                                tol = args.tol,
+                                lam = 1.0,
+                                kappa = 0.5,
+                                line_search_method="soft",
+                                line_search_params={'rho': 0.5},
+                                )
+        methods['SparseRegNewton'] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
+        save_times(methods, save_path)
     elif args.method == "ADAM":
         Geodesic = JAXOptimization(M = M,
                                    init_fun=None,
@@ -238,17 +263,6 @@ def riemannian_runtime()->None:
                                    )
         methods["ADAM"] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
         save_times(methods, save_path)
-    elif "BVP" in args.method:
-        method_type = args.method.replace('BVP_', '')
-        Geodesic = ScipyBVP(M = M,
-                            T=args.T,
-                            tol=args.tol,
-                            max_iter=args.max_iter,
-                            method=method_type,
-                            )
-        methods[method_type] = estimate_method(Geodesic, z0, zT, M, base_length)
-        print(methods)
-        save_times(methods, save_path)
     elif args.method == "SGD":
         Geodesic = JAXOptimization(M = M,
                                    init_fun=None,
@@ -259,6 +273,16 @@ def riemannian_runtime()->None:
                                    tol=args.tol
                                    )
         methods["SGD"] = estimate_method(jit(Geodesic), z0, zT, M, base_length)
+        save_times(methods, save_path)
+    elif "BVP" in args.method:
+        method_type = args.method.replace('BVP_', '')
+        Geodesic = ScipyBVP(M = M,
+                            T=args.T,
+                            tol=args.tol,
+                            max_iter=args.max_iter,
+                            method=method_type,
+                            )
+        methods[method_type] = estimate_method(Geodesic, z0, zT, M, base_length)
         save_times(methods, save_path)
     else:
         try:

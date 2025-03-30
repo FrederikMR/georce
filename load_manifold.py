@@ -54,7 +54,7 @@ def load_manifold(manifold:str="Euclidean",
         M = nParaboloid(dim=dim)
         z0 = -jnp.linspace(0,1,dim)
         zT = jnp.ones(dim, dtype=jnp.float32)
-        rho = 0.5
+        rho = 0.5    
     elif manifold == "Sphere":
         M = nSphere(dim=dim)
         z0 = -jnp.linspace(0,1,dim)

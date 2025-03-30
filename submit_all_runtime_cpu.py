@@ -69,7 +69,7 @@ def generate_job(manifold, d, T, method, geometry, tol):
 def loop_jobs(wait_time = 1.0):
     
     geomtries = ['Riemannian', 'Finsler']
-    Ts = [50,100]    
+    Ts = [100, 50]    
     scipy_methods = ["BFGS", 'CG', 'dogleg', 'trust-ncg', 'trust-exact']
     jax_methods = ["ADAM", "SGD"]
     methods = ['GEORCE', 'init', 'ground_truth']
@@ -89,10 +89,7 @@ def loop_jobs(wait_time = 1.0):
             "mnist": [[8],1e-3],
             }
     
-    geomtries = ['Riemannian']
-    Ts = [100]
-    methods = ['BVP_RK45', 'BVP_RK23', 'BVP_DOP853', 'BVP_Radau', 'BVP_BDF', 'BVP_LSODA']
-    runs = {"Sphere": [[2,3,5,10,20,50,100, 250, 500, 1000],1e-4]}
+    methods = ['SparseNewton', 'SparseRegNewton']
 
     for geo in geomtries:
         for T in Ts:
